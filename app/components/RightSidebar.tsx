@@ -5,34 +5,8 @@ import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import { DbGuest, DbProject, DbEvent, DbWish, isDefaultStorageUrl } from "../../lib/resolveProject";
 
-export const ASSETS = {
-  strip: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-01.png",
-  couple: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-02.png",
-  calendarIcon: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-03.png",
-  clockIcon: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-04.png",
-  pinIcon: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-05.png",
-  tagLeft: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-06.png",
-  tagRight: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-07.png",
-  openMapBtn: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-08.png",
-  titleDatePlace: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-09.png",
-  titleOurStory: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-10.png",
-  titleDressCode: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-11.png",
-  titleAttendance: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-12.png",
-  titleBlessings: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-13.png",
-  titleWeddingGift: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-14.png",
-  titleRsvp: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-15.png",
-  timelineHeart: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-16.png",
-  timelineFlowers: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-17.png",
-  timelineRings: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-18.png",
-  dressCodeAttire: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-19.png",
-  timelineLine: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-20.png",
-  inputBorder: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-21.png",
-  btnConfirmPresence: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-22.png",
-  btnSubmitBlessing: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-23.png",
-  cardContainer: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-24.png",
-  rsvpArch: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-25.png?v=3",
-  topRings: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-26.png",
-};
+import { ASSETS } from "../../lib/assets";
+export { ASSETS };
 
 interface Props {
   guestName: string;
@@ -378,7 +352,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: false, amount: 0.2, margin: "-40px" }}
           transition={{ duration: 0.6 }}
           className="text-center space-y-5 pt-2"
         >
@@ -457,7 +431,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: false, amount: 0.2, margin: "-40px" }}
           transition={{ duration: 0.6 }}
           className="text-center space-y-4 pt-4"
         >
@@ -489,7 +463,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                     key={idx} 
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-30px" }}
+                    viewport={{ once: false, amount: 0.2, margin: "-30px" }}
                     transition={{ duration: 0.5, delay: idx * 0.15 }}
                     className="flex items-center justify-between gap-4"
                   >
@@ -517,7 +491,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                     {/* Center Icon: NO CIRCLE BORDER, ENLARGED (User request: gausah dibuletin lagi sama digedein lagi) */}
                     <motion.div 
                       whileInView={{ scale: [0.8, 1.15, 1], opacity: 1 }}
-                      viewport={{ once: true }}
+                      viewport={{ once: false, amount: 0.2 }}
                       whileHover={{ scale: 1.25, rotate: [0, -8, 8, 0] }}
                       transition={{ duration: 0.5 }}
                       className="w-16 h-16 shrink-0 bg-[#fdfbf7] flex items-center justify-center z-10 py-1 select-none cursor-pointer"
@@ -560,7 +534,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: false, amount: 0.2, margin: "-40px" }}
           transition={{ duration: 0.6 }}
           className="text-center space-y-4 pt-4"
         >
@@ -602,7 +576,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                   key={i}
                   initial={{ scale: 0, opacity: 0 }}
                   whileInView={{ scale: 1, opacity: 1 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: false, amount: 0.2 }}
                   transition={{ delay: i * 0.1, type: "spring", stiffness: 300 }}
                   whileHover={{ scale: 1.25, y: -4 }}
                   className={`w-9 h-9 rounded-full ${c.bg} ${c.border} border-2 shadow-sm cursor-pointer`}
@@ -802,7 +776,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: false, amount: 0.2, margin: "-40px" }}
           transition={{ duration: 0.6 }}
           className="text-center space-y-4 pt-4"
         >
@@ -854,15 +828,22 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
                 Number of Guests
               </label>
-              <select
-                value={guestCount}
-                onChange={(e) => setGuestCount(Number(e.target.value))}
-                className="w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white transition-all cursor-pointer"
-              >
-                <option value={1}>1 Person</option>
-                <option value={2}>2 Persons</option>
-                <option value={3}>3 Persons</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={guestCount}
+                  onChange={(e) => setGuestCount(Number(e.target.value))}
+                  className="w-full appearance-none border-2 border-neutral-900 rounded-full pl-5 pr-11 py-2.5 font-gaegu text-base font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white transition-all cursor-pointer shadow-xs"
+                >
+                  <option value={1}>1 Person</option>
+                  <option value={2}>2 Persons</option>
+                  <option value={3}>3 Persons</option>
+                </select>
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-800 flex items-center justify-center">
+                  <svg className="w-4 h-4 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Field: Confirmation Presence Status */}
@@ -931,7 +912,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         <motion.section 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: false, amount: 0.2, margin: "-40px" }}
           transition={{ duration: 0.6 }}
           className="text-center space-y-4 pt-4"
         >
@@ -1022,7 +1003,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                   key={w.id || idx}
                   initial={{ opacity: 0, y: 15 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
+                  viewport={{ once: false, amount: 0.2 }}
                   transition={{ delay: idx * 0.08 }}
                   whileHover={{ scale: 1.02 }}
                   className={`bg-white border-2 border-neutral-900 rounded-2xl p-4 shadow-sm relative overflow-hidden transition-all ${

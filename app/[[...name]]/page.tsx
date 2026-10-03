@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
-import RightSidebar, { ASSETS } from "../components/RightSidebar";
+import RightSidebar from "../components/RightSidebar";
+import { ASSETS } from "../../lib/assets";
 import { headers } from "next/headers";
 import { resolveProjectData, isDefaultStorageUrl } from "../../lib/resolveProject";
 import type { Metadata } from "next";
