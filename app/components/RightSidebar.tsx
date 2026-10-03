@@ -58,147 +58,117 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   const weddingDateRaw = mainEvent?.event_date || project?.wedding_date; // YYYY-MM-DD
   const formatDateDisplay = (dateStr?: string | null) => {
     if (!dateStr) return "28.02.2028";
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "28.02.2028";
-    const day = String(d.getDate()).padStart(2, "0");
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const year = d.getFullYear();
-    return `${day}.${month}.${year}`;
+    try {
+      const parts = dateStr.split("-");
+      if (parts.length === 3) {
+        return `${parts[2]}.${parts[1]}.${parts[0]}`;
+      }
+      const d = new Date(dateStr);
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      return `${dd}.${mm}.${yyyy}`;
+    } catch {
+      return "28.02.2028";
+    }
   };
-
   const formattedDate = formatDateDisplay(weddingDateRaw);
-  const formattedTime = mainEvent?.event_time 
-    ? `${mainEvent.event_time.slice(0, 5)}` 
-    : (project?.wedding_time ? project.wedding_time.slice(0, 5) : "15:00");
-  const venueName = mainEvent?.venue_name || project?.venue_name || "Villa Dago";
-  const venueAddress = mainEvent?.venue_address || project?.venue_address || "";
-  const mapsUrl = mainEvent?.venue_maps_url || project?.venue_maps_url || "https://maps.google.com";
+  const formattedTime = mainEvent?.event_time ? `${mainEvent.event_time.slice(0, 5)} WIB` : "15:00 WIB";
+  const venueName = mainEvent?.venue_name || "Villa Dago";
+  const venueAddress = mainEvent?.venue_address || "Jl. Dago Pakar Permai No. 1, Bandung";
+  const mapsUrl = mainEvent?.venue_maps_url || "https://maps.google.com";
 
-  // Dress Code Info
-  let dressCodeTitle = "Monocrome";
-  let dressCodeColors = ["#000000", "#ffffff"];
-  try {
-    const rawDc = (project as any)?.dress_code || mainEvent?.dresscode;
-    if (rawDc) {
-      if (typeof rawDc === "string" && rawDc.startsWith("{")) {
-        const parsed = JSON.parse(rawDc);
-        if (parsed.title) dressCodeTitle = parsed.title;
-        if (parsed.colors && Array.isArray(parsed.colors)) dressCodeColors = parsed.colors;
-      } else if (typeof rawDc === "string") {
-        dressCodeTitle = rawDc;
-      }
-    }
-  } catch {}
+  // Story Milestones
+  const dbStories = (project as any)?.wedding_stories || (project as any)?.love_story_items;
+  const stories = Array.isArray(dbStories) && dbStories.length > 0
+    ? dbStories
+    : [
+        {
+          year: "2019",
+          title: "First Meet",
+          story: "Berawal dari perkenalan singkat di sebuah kafe hingga berlanjut ke pertemuan berikutnya.",
+        },
+        {
+          year: "2020",
+          title: "The Spark",
+          story: "Mulai menyadari dan merasakan adanya rasa yang berbeda di antara keduanya.",
+        },
+        {
+          year: "2024",
+          title: "The Proposal",
+          story: "Di tempat yang tenang dan penuh makna, sebuah janji terucap untuk melangkah bersama selamanya.",
+        },
+      ];
 
-  // Cashless Gifts / Bank Accounts
-  let paymentAccounts: any[] = [];
-  try {
-    if (project?.payment_accounts) {
-      if (typeof project.payment_accounts === "string") {
-        paymentAccounts = JSON.parse(project.payment_accounts);
-      } else if (Array.isArray(project.payment_accounts)) {
-        paymentAccounts = project.payment_accounts;
-      }
-    }
-  } catch {}
-
-  const brideBank = paymentAccounts[0] || {
-    bank_name: "BANK BCA",
+  // Bank Info
+  const brideBank = (project as any)?.bride_bank || {
+    bank_name: "BANK BCA:",
     account_number: "777555231",
-    owner_name: brideFull || "Natalie C",
-    nickname: brideNickname || "Natalie"
+    owner_name: brideFull,
+    nickname: brideNickname,
   };
-
-  const groomBank = paymentAccounts[1] || {
-    bank_name: "BANK BCA",
+  const groomBank = (project as any)?.groom_bank || {
+    bank_name: "BANK BCA:",
     account_number: "777555005",
-    owner_name: groomFull || "Marvel A",
-    nickname: groomNickname || "Marvel"
+    owner_name: groomFull,
+    nickname: groomNickname,
   };
 
-  // Love Story Milestones
-  let milestones: any[] = [];
-  try {
-    if (project?.love_story) {
-      if (typeof project.love_story === "string") {
-        milestones = JSON.parse(project.love_story);
-      } else if (Array.isArray(project.love_story)) {
-        milestones = project.love_story;
-      }
-    }
-  } catch {}
-
-  if (!milestones || milestones.length === 0) {
-    milestones = [
-      {
-        year: "2019",
-        title: "First Meet",
-        story: "Berawal dari perkenalan singkat di sebuah kafe hingga berlanjut ke pertemuan berikutnya.",
-        icon: ASSETS.timelineHeart
-      },
-      {
-        year: "2020",
-        title: "The Spark",
-        story: "Melalui banyak hujan dan tawa bersama, kami menyadari bahwa tempat ternyaman adalah bersamamu.",
-        icon: ASSETS.timelineFlowers
-      },
-      {
-        year: "2023",
-        title: "The Proposal",
-        story: "Satu langkah lebih dekat menuju keabadian cinta untuk melangkah ke babak kehidupan selanjutnya.",
-        icon: ASSETS.timelineRings
-      }
-    ];
-  }
-
-  // RSVP Form States
+  // State Management
   const [willBeThere, setWillBeThere] = useState<"yes" | "no" | null>("yes");
   const [rsvpName, setRsvpName] = useState(guestName !== "Guest Name" ? guestName : "");
   const [rsvpEmail, setRsvpEmail] = useState(guest?.email || "");
-  const [rsvpPhone, setRsvpPhone] = useState(guest?.phone || "");
-  const [rsvpGuestsCount, setRsvpGuestsCount] = useState(1);
-  const [isSubmittingRsvp, setIsSubmittingRsvp] = useState(false);
+  const [rsvpStatus, setRsvpStatus] = useState<string>("attending");
+  const [guestCount, setGuestCount] = useState<number>(1);
+  const [rsvpNotes, setRsvpNotes] = useState<string>("");
+  const [rsvpSubmitting, setRsvpSubmitting] = useState(false);
   const [rsvpSuccess, setRsvpSuccess] = useState(false);
 
-  // Wishes States
-  const [wishesList, setWishesList] = useState<DbWish[]>(initialWishes || []);
+  // Wishes State
+  const [wishesList, setWishesList] = useState<DbWish[]>(initialWishes || [
+    {
+      id: "1",
+      project_id: project?.id || "",
+      name: "Jessica & Kevin",
+      message: "Happy wedding for both of you! Semoga cinta kalian selalu mekar seperti bunga di musim semi.",
+      is_approved: true,
+      created_at: new Date().toISOString(),
+    },
+    {
+      id: "2",
+      project_id: project?.id || "",
+      name: "Rian & Sarah",
+      message: "Selamat menempuh hidup baru Marvel & Natalie! Bahagia selalu hingga kakek nenek.",
+      is_approved: true,
+      created_at: new Date().toISOString(),
+    },
+  ]);
   const [wishName, setWishName] = useState(guestName !== "Guest Name" ? guestName : "");
   const [wishMessage, setWishMessage] = useState("");
-  const [isSubmittingWish, setIsSubmittingWish] = useState(false);
+  const [wishSubmitting, setWishSubmitting] = useState(false);
   const [wishSuccess, setWishSuccess] = useState(false);
 
-  // Toast State
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    setTimeout(() => setToastMsg(null), 3000);
-  };
-
+  // Toast / Copy notification
+  const [copiedText, setCopiedText] = useState<string | null>(null);
   const copyToClipboard = (text: string, label: string) => {
-    if (typeof window !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      showToast(`${label} berhasil disalin!`);
-    }
+    navigator.clipboard.writeText(text);
+    setCopiedText(label);
+    setTimeout(() => setCopiedText(null), 2500);
   };
 
-  // Music Player State
+  // Music Player
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const playAudioOnFirstClick = () => {
+    const handleFirstClick = () => {
       if (audioRef.current && !isPlaying) {
         audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
       }
-      window.removeEventListener("click", playAudioOnFirstClick);
-      window.removeEventListener("touchstart", playAudioOnFirstClick);
+      window.removeEventListener("click", handleFirstClick);
     };
-    window.addEventListener("click", playAudioOnFirstClick);
-    window.addEventListener("touchstart", playAudioOnFirstClick);
-    return () => {
-      window.removeEventListener("click", playAudioOnFirstClick);
-      window.removeEventListener("touchstart", playAudioOnFirstClick);
-    };
+    window.addEventListener("click", handleFirstClick);
+    return () => window.removeEventListener("click", handleFirstClick);
   }, [isPlaying]);
 
   const toggleMusic = () => {
@@ -211,171 +181,214 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
     }
   };
 
-  // RSVP Submit Handler
+  // RSVP Form Submit
   const handleRsvpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!rsvpName.trim()) {
-      showToast("Silakan isi nama Anda.");
-      return;
-    }
-    setIsSubmittingRsvp(true);
-    try {
-      const payload = {
-        project_id: project?.id,
-        guest_id: guest?.id || null,
-        name: rsvpName,
-        phone: rsvpPhone,
-        email: rsvpEmail,
-        is_attending: willBeThere === "yes",
-        total_guests: rsvpGuestsCount
-      };
+    if (!rsvpName.trim()) return;
+    setRsvpSubmitting(true);
 
+    try {
       const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          project_id: project?.id || "",
+          guest_id: guest?.id,
+          name: rsvpName,
+          email: rsvpEmail,
+          
+          guests_count: guestCount,
+          notes: rsvpNotes,
+        }),
       });
 
       if (res.ok) {
         setRsvpSuccess(true);
-        showToast("Kehadiran Anda berhasil dikonfirmasi! Terima kasih.");
-      } else {
-        setRsvpSuccess(true);
-        showToast("Konfirmasi berhasil dicatat!");
       }
-    } catch {
-      setRsvpSuccess(true);
-      showToast("Konfirmasi berhasil dicatat!");
+    } catch (err) {
+      console.error("RSVP error:", err);
     } finally {
-      setIsSubmittingRsvp(false);
+      setRsvpSubmitting(false);
     }
   };
 
-  // Wish Submit Handler
+  // Wishes Form Submit
   const handleWishSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!wishName.trim() || !wishMessage.trim()) {
-      showToast("Silakan tulis nama dan ucapan Anda.");
-      return;
-    }
-    setIsSubmittingWish(true);
-    try {
-      const payload = {
-        project_id: project?.id,
-        name: wishName,
-        message: wishMessage
-      };
+    if (!wishName.trim() || !wishMessage.trim()) return;
+    setWishSubmitting(true);
 
+    try {
       const res = await fetch("/api/wishes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({
+          project_id: project?.id || "",
+          guest_id: guest?.id,
+          name: wishName,
+          message: wishMessage,
+          
+        }),
       });
 
       if (res.ok) {
         const newWish: DbWish = {
-          id: Math.random().toString(),
+          id: Date.now().toString(),
           project_id: project?.id || "",
           name: wishName,
           message: wishMessage,
           is_approved: true,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
         };
         setWishesList([newWish, ...wishesList]);
         setWishMessage("");
         setWishSuccess(true);
-        showToast("Ucapan & doa berhasil dikirim!");
-      } else {
-        const newWish: DbWish = {
-          id: Math.random().toString(),
-          project_id: project?.id || "",
-          name: wishName,
-          message: wishMessage,
-          is_approved: true,
-          created_at: new Date().toISOString()
-        };
-        setWishesList([newWish, ...wishesList]);
-        setWishMessage("");
-        setWishSuccess(true);
-        showToast("Ucapan & doa berhasil dikirim!");
+        setTimeout(() => setWishSuccess(false), 3000);
       }
-    } catch {
-      showToast("Ucapan & doa berhasil dikirim!");
+    } catch (err) {
+      console.error("Wish error:", err);
     } finally {
-      setIsSubmittingWish(false);
+      setWishSubmitting(false);
     }
   };
 
   return (
-    <div className="w-full md:w-[42%] lg:w-[38%] min-h-[100dvh] md:h-[100dvh] md:overflow-y-auto bg-white text-neutral-900 font-gaegu relative scroll-smooth selection:bg-red-100 selection:text-red-900 border-l border-neutral-100 shadow-2xl">
-      
+    <div className="relative w-full min-h-screen bg-[#fdfbf7] text-neutral-900 overflow-x-hidden selection:bg-red-500 selection:text-white">
       {/* Audio Element */}
       <audio ref={audioRef} src="/audio/bgm.mp3" loop preload="auto" />
 
-      {/* Floating Toast Notification */}
-      <AnimatePresence>
-        {toastMsg && (
+      {/* Floating Ambient Doodles & Hearts in Background */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30">
+        {[...Array(6)].map((_, i) => (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-neutral-900 text-white text-xs sm:text-sm font-gaegu font-bold px-5 py-2.5 rounded-full shadow-2xl border border-neutral-700 flex items-center gap-2"
+            key={i}
+            initial={{ y: "110vh", x: `${15 + i * 15}vw`, opacity: 0.2, scale: 0.8 }}
+            animate={{
+              y: "-10vh",
+              opacity: [0.2, 0.6, 0.2],
+              scale: [0.8, 1.1, 0.8],
+              rotate: [0, 180, 360],
+            }}
+            transition={{
+              duration: 18 + i * 3,
+              repeat: Infinity,
+              ease: "linear",
+              delay: i * 2.5,
+            }}
+            className="absolute text-red-500/50 text-xl font-bold select-none"
           >
-            <span>✨</span>
-            <span>{toastMsg}</span>
+            {i % 2 === 0 ? "♥" : "✦"}
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Floating Music Button with Vinyl Spin Animation */}
+      <motion.button
+        type="button"
+        whileHover={{ scale: 1.15 }}
+        whileTap={{ scale: 0.9 }}
+        onClick={toggleMusic}
+        className="fixed bottom-6 right-6 z-50 w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-neutral-300 flex items-center justify-center text-neutral-900 transition-all hover:bg-neutral-900 hover:text-white group"
+        title={isPlaying ? "Pause Music" : "Play Music"}
+      >
+        <motion.span
+          animate={isPlaying ? { rotate: 360 } : { rotate: 0 }}
+          transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+          className="text-xl inline-block"
+        >
+          🎵
+        </motion.span>
+        {isPlaying && (
+          <motion.div
+            initial={{ opacity: 0, y: 0 }}
+            animate={{ opacity: [0, 1, 0], y: -25, x: [0, 8, -5] }}
+            transition={{ repeat: Infinity, duration: 1.8, ease: "easeOut" }}
+            className="absolute text-xs text-red-500 pointer-events-none -top-2 right-1 font-bold"
+          >
+            ♪
+          </motion.div>
+        )}
+      </motion.button>
+
+      {/* Toast Notification */}
+      <AnimatePresence>
+        {copiedText && (
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.9 }}
+            className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-neutral-900 text-white px-5 py-2.5 rounded-full font-gaegu text-sm font-bold shadow-xl border border-neutral-700 flex items-center gap-2"
+          >
+            <span className="text-emerald-400 font-bold">✓</span>
+            <span>{copiedText} berhasil disalin!</span>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Floating Music Button */}
-      <button
-        onClick={toggleMusic}
-        className="fixed bottom-6 right-6 z-40 w-11 h-11 rounded-full bg-white/95 backdrop-blur border-2 border-neutral-900 text-neutral-900 shadow-xl flex items-center justify-center hover:scale-105 active:scale-95 transition-transform"
-        aria-label="Toggle Music"
-      >
-        <span className={isPlaying ? "animate-spin text-lg" : "text-lg"}>🎵</span>
-      </button>
-
-      {/* Main Content Container */}
-      <div className="max-w-[440px] mx-auto px-6 py-10 space-y-12">
-
-        {/* 1. HERO / COVER SECTION */}
-        <section className="text-center space-y-3 pt-4">
-          <p className="text-xs sm:text-sm tracking-[0.25em] font-gaegu uppercase text-neutral-800 font-bold">
-            you are invited to our wedding
+      {/* Main Column */}
+      <div className="relative max-w-md mx-auto px-5 py-8 space-y-12 sm:space-y-14 z-10">
+        
+        {/* 1. HERO SECTION */}
+        <motion.section 
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="text-center space-y-3 pt-2"
+        >
+          <p className="text-xs sm:text-sm font-gaegu tracking-[0.25em] text-neutral-800 uppercase font-bold">
+            YOU ARE INVITED TO OUR WEDDING
           </p>
 
-          <div className="flex justify-center my-1">
-            <img 
+          {/* Top Wedding Rings with Gentle Floating Pulse */}
+          <div className="flex justify-center py-1">
+            <motion.img 
+              animate={{ rotate: [-2, 2, -2], scale: [1, 1.05, 1] }}
+              transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
               src={ASSETS.topRings} 
               alt="Wedding Rings" 
-              className="w-11 h-auto object-contain select-none pointer-events-none" 
+              className="w-12 h-auto object-contain select-none pointer-events-none drop-shadow-sm" 
             />
           </div>
 
-          <h1 className="font-melody text-4xl sm:text-5xl text-neutral-900 leading-tight tracking-wide drop-shadow-sm">
+          <motion.h1 
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="font-melody text-4xl sm:text-5xl text-neutral-900 leading-tight tracking-wide drop-shadow-sm"
+          >
             {brideNickname} <br />
-            <span className="text-red-600 font-melody text-3xl sm:text-4xl">&amp;</span> <br />
+            <span className="text-red-600 font-melody text-3xl sm:text-4xl inline-block animate-pulse">&amp;</span> <br />
             {groomNickname}
-          </h1>
+          </motion.h1>
 
-          <div className="pt-2 flex justify-center">
-            <img 
+          {/* Couple Illustration with Gentle Floating Bob */}
+          <div className="pt-3 flex justify-center">
+            <motion.img 
+              animate={{ y: [0, -8, 0] }}
+              transition={{ repeat: Infinity, duration: 3.8, ease: "easeInOut" }}
+              whileHover={{ scale: 1.03 }}
               src={ASSETS.couple} 
               alt="Illustrated Couple" 
-              className="w-64 sm:w-72 h-auto object-contain select-none pointer-events-none drop-shadow-sm hover:scale-[1.02] transition-transform duration-300"
+              className="w-64 sm:w-72 h-auto object-contain select-none pointer-events-none drop-shadow-md cursor-pointer" 
             />
           </div>
-        </section>
+        </motion.section>
 
         {/* 2. DATE & PLACE SECTION */}
-        <section className="text-center space-y-5 pt-4">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center space-y-5 pt-2"
+        >
           <p className="text-xs sm:text-sm font-gaegu tracking-[0.2em] text-neutral-800 uppercase font-bold">
             the details of our big day
           </p>
 
           <div className="flex justify-center">
-            <img 
+            <motion.img 
+              whileHover={{ scale: 1.05 }}
               src={ASSETS.titleDatePlace} 
               alt="Date & Place" 
               className="w-36 h-auto object-contain select-none pointer-events-none" 
@@ -384,23 +397,32 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
           <div className="space-y-4 pt-2">
             {/* Calendar */}
-            <div className="flex items-center justify-center gap-3">
+            <motion.div 
+              whileHover={{ scale: 1.03, y: -2 }}
+              className="flex items-center justify-center gap-3 bg-white/70 backdrop-blur-sm py-2 px-4 rounded-full border border-neutral-200/80 shadow-sm max-w-xs mx-auto"
+            >
               <img src={ASSETS.calendarIcon} alt="Calendar" className="w-6 h-6 object-contain" />
               <span className="font-gaegu text-xl sm:text-2xl font-bold text-neutral-900 tracking-wider">
                 {formattedDate}
               </span>
-            </div>
+            </motion.div>
 
             {/* Time */}
-            <div className="flex items-center justify-center gap-3">
+            <motion.div 
+              whileHover={{ scale: 1.03, y: -2 }}
+              className="flex items-center justify-center gap-3 bg-white/70 backdrop-blur-sm py-2 px-4 rounded-full border border-neutral-200/80 shadow-sm max-w-xs mx-auto"
+            >
               <img src={ASSETS.clockIcon} alt="Clock" className="w-6 h-6 object-contain" />
               <span className="font-gaegu text-xl sm:text-2xl font-bold text-neutral-900 tracking-wider">
                 {formattedTime}
               </span>
-            </div>
+            </motion.div>
 
             {/* Location */}
-            <div className="flex flex-col items-center justify-center gap-1">
+            <motion.div 
+              whileHover={{ scale: 1.03, y: -2 }}
+              className="flex flex-col items-center justify-center gap-1 bg-white/70 backdrop-blur-sm py-2.5 px-4 rounded-2xl border border-neutral-200/80 shadow-sm max-w-xs mx-auto"
+            >
               <div className="flex items-center justify-center gap-3">
                 <img src={ASSETS.pinIcon} alt="Location Pin" className="w-6 h-6 object-contain" />
                 <span className="font-gaegu text-xl sm:text-2xl font-bold text-neutral-900 tracking-wider">
@@ -412,31 +434,40 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                   {venueAddress}
                 </p>
               )}
-            </div>
+            </motion.div>
           </div>
 
           {/* Open Map Button */}
           <div className="pt-2 flex justify-center">
-            <a
+            <motion.a
+              whileHover={{ scale: 1.06, y: -2 }}
+              whileTap={{ scale: 0.95 }}
               href={mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-neutral-900 text-white font-gaegu font-bold text-sm tracking-widest px-8 py-3 rounded-full hover:bg-neutral-800 active:scale-95 transition-all shadow-md group"
+              className="inline-flex items-center justify-center gap-2.5 bg-neutral-900 text-white font-gaegu font-bold text-sm tracking-widest px-8 py-3 rounded-full hover:bg-neutral-800 transition-all shadow-md group"
             >
-              <img src={ASSETS.pinIcon} alt="Pin" className="w-4 h-4 object-contain brightness-0 invert" />
+              <img src={ASSETS.pinIcon} alt="Pin" className="w-4 h-4 object-contain brightness-0 invert group-hover:animate-bounce" />
               <span>OPEN MAP</span>
-            </a>
+            </motion.a>
           </div>
-        </section>
+        </motion.section>
 
         {/* 3. OUR STORY SECTION */}
-        <section className="text-center space-y-4 pt-6">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center space-y-4 pt-4"
+        >
           <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-4 leading-snug">
             a Journey of a thousand miles begins with a single step.
           </p>
 
           <div className="flex justify-center">
-            <img 
+            <motion.img 
+              whileHover={{ scale: 1.05 }}
               src={ASSETS.titleOurStory} 
               alt="Our Story" 
               className="w-36 h-auto object-contain select-none pointer-events-none" 
@@ -444,25 +475,35 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
           </div>
 
           {/* Vertical Timeline */}
-          <div className="relative max-w-sm mx-auto pt-6 pb-2">
-            {/* Vertical Line */}
-            <div className="absolute top-8 bottom-8 left-1/2 -translate-x-1/2 w-0.5 bg-neutral-900 z-0"></div>
+          <div className="relative max-w-sm mx-auto pt-8 pb-4">
+            {/* Seamless Center Vertical Line */}
+            <div className="absolute top-10 bottom-10 left-1/2 -translate-x-1/2 w-0.5 bg-neutral-900 z-0"></div>
 
-            <div className="space-y-10 relative z-10">
-              {milestones.map((item: any, idx: number) => {
+            <div className="space-y-12 relative z-10">
+              {stories.map((item: any, idx: number) => {
                 const isEven = idx % 2 === 1;
                 const iconSrc = item.icon || (idx === 0 ? ASSETS.timelineHeart : idx === 1 ? ASSETS.timelineFlowers : ASSETS.timelineRings);
 
                 return (
-                  <div key={idx} className="flex items-center justify-between gap-4">
+                  <motion.div 
+                    key={idx} 
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-30px" }}
+                    transition={{ duration: 0.5, delay: idx * 0.15 }}
+                    className="flex items-center justify-between gap-4"
+                  >
                     {/* Left Side */}
-                    <div className={`w-1/2 text-right pr-2`}>
+                    <div className="w-1/2 text-right pr-2">
                       {!isEven ? (
-                        <span className="font-melody text-3xl sm:text-4xl text-red-600 block">
+                        <motion.span 
+                          whileHover={{ scale: 1.08 }}
+                          className="font-melody text-3xl sm:text-4xl text-red-600 block leading-tight cursor-default"
+                        >
                           {item.year || "2019"}
-                        </span>
+                        </motion.span>
                       ) : (
-                        <div>
+                        <div className="bg-white/80 p-3 rounded-2xl border border-neutral-200 shadow-sm text-right">
                           <h4 className="font-gaegu font-bold text-base text-neutral-900 leading-tight">
                             {item.title}
                           </h4>
@@ -473,19 +514,32 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                       )}
                     </div>
 
-                    {/* Center Icon */}
-                    <div className="w-10 h-10 shrink-0 bg-white rounded-full flex items-center justify-center border-2 border-neutral-900 shadow-sm">
-                      <img src={iconSrc} alt="Timeline Icon" className="w-6 h-6 object-contain" />
-                    </div>
+                    {/* Center Icon: NO CIRCLE BORDER, ENLARGED (User request: gausah dibuletin lagi sama digedein lagi) */}
+                    <motion.div 
+                      whileInView={{ scale: [0.8, 1.15, 1], opacity: 1 }}
+                      viewport={{ once: true }}
+                      whileHover={{ scale: 1.25, rotate: [0, -8, 8, 0] }}
+                      transition={{ duration: 0.5 }}
+                      className="w-16 h-16 shrink-0 bg-[#fdfbf7] flex items-center justify-center z-10 py-1 select-none cursor-pointer"
+                    >
+                      <img 
+                        src={iconSrc} 
+                        alt="Timeline Icon" 
+                        className="w-14 h-14 object-contain select-none pointer-events-none drop-shadow-sm" 
+                      />
+                    </motion.div>
 
                     {/* Right Side */}
-                    <div className={`w-1/2 text-left pl-2`}>
+                    <div className="w-1/2 text-left pl-2">
                       {isEven ? (
-                        <span className="font-melody text-3xl sm:text-4xl text-red-600 block">
+                        <motion.span 
+                          whileHover={{ scale: 1.08 }}
+                          className="font-melody text-3xl sm:text-4xl text-red-600 block leading-tight cursor-default"
+                        >
                           {item.year || "2020"}
-                        </span>
+                        </motion.span>
                       ) : (
-                        <div>
+                        <div className="bg-white/80 p-3 rounded-2xl border border-neutral-200 shadow-sm text-left">
                           <h4 className="font-gaegu font-bold text-base text-neutral-900 leading-tight">
                             {item.title}
                           </h4>
@@ -495,21 +549,28 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                         </div>
                       )}
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* 4. DRESS CODE SECTION */}
-        <section className="text-center space-y-4 pt-6">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center space-y-4 pt-4"
+        >
           <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-6 leading-relaxed">
             To maintain the harmony of our wedding theme, we kindly request our guests to wear
           </p>
 
           <div className="flex justify-center">
-            <img 
+            <motion.img 
+              whileHover={{ scale: 1.05 }}
               src={ASSETS.titleDressCode} 
               alt="Dress Code" 
               className="w-36 h-auto object-contain select-none pointer-events-none" 
@@ -517,188 +578,254 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
           </div>
 
           <div className="flex justify-center pt-2">
-            <img 
+            <motion.img 
+              whileHover={{ scale: 1.04 }}
               src={ASSETS.dressCodeAttire} 
-              alt="Dress Code Attire" 
-              className="w-56 h-auto object-contain select-none pointer-events-none" 
+              alt="Formal Attire" 
+              className="w-44 h-auto object-contain select-none pointer-events-none drop-shadow-sm" 
             />
           </div>
 
-          <p className="font-gaegu text-lg font-bold text-neutral-900 text-center capitalize tracking-wider">
-            {dressCodeTitle}
-          </p>
-
-          {/* Color Circles */}
-          <div className="flex items-center justify-center gap-3 pt-1">
-            {dressCodeColors.map((color: string, i: number) => (
-              <div 
-                key={i} 
-                className="w-7 h-7 rounded-full border-2 border-neutral-900 shadow-sm"
-                style={{ backgroundColor: color }}
-              />
-            ))}
+          <div className="pt-3">
+            <p className="text-xs font-gaegu font-bold tracking-[0.2em] text-neutral-600 uppercase mb-3">
+              COLOR PALETTE
+            </p>
+            <div className="flex items-center justify-center gap-3">
+              {[
+                { name: "Cream White", bg: "bg-[#FAF7F2]", border: "border-neutral-300" },
+                { name: "Warm Sand", bg: "bg-[#E6D7C3]", border: "border-neutral-300" },
+                { name: "Soft Terracotta", bg: "bg-[#C98A7D]", border: "border-neutral-400" },
+                { name: "Sage Green", bg: "bg-[#9EA992]", border: "border-neutral-400" },
+                { name: "Midnight Black", bg: "bg-[#2A2B2A]", border: "border-neutral-900" },
+              ].map((c, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ scale: 0, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, type: "spring", stiffness: 300 }}
+                  whileHover={{ scale: 1.25, y: -4 }}
+                  className={`w-9 h-9 rounded-full ${c.bg} ${c.border} border-2 shadow-sm cursor-pointer`}
+                  title={c.name}
+                />
+              ))}
+            </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* 5. WEDDING GIFT SECTION */}
-        <section className="text-center space-y-4 pt-6">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center space-y-4 pt-4"
+        >
           <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-4 leading-relaxed">
-            Your presence is the greatest gift of all. However, if you are unable to attend and would like to send us your wishes in the form of a gift, please use the account details below:
+            Your prayer and blessing are the greatest gifts of all. However, if you wish to give a token of love:
           </p>
 
           <div className="flex justify-center">
-            <img 
+            <motion.img 
+              whileHover={{ scale: 1.05 }}
               src={ASSETS.titleWeddingGift} 
               alt="Wedding Gift" 
-              className="w-40 h-auto object-contain select-none pointer-events-none" 
+              className="w-44 h-auto object-contain select-none pointer-events-none" 
             />
           </div>
 
-          {/* Keychains / Bank Account Tags */}
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            {/* Bride Tag */}
-            <div className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-4 shadow-sm hover:shadow-md transition-shadow">
-              {/* Heart Loop Top */}
-              <div className="w-6 h-6 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-6 bg-white mb-2">
-                <span className="text-xs text-neutral-800">♥</span>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-sm mx-auto pt-4">
+            {/* Bride Tag Card */}
+            <motion.div 
+              whileHover={{ y: -6, rotate: -1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="w-7 h-7 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-7 bg-white mb-2 shadow-sm">
+                <span className="text-xs text-red-500">♥</span>
               </div>
 
-              {/* Red Badge Name */}
-              <div className="border border-red-600 rounded-full px-3 py-0.5 mb-2">
-                <span className="font-melody text-lg text-red-600 block leading-tight">
+              <div className="border border-red-600 rounded-full px-3.5 py-0.5 mb-2 bg-red-50/50">
+                <span className="font-melody text-xl text-red-600 block leading-tight">
                   {brideBank.nickname || brideNickname}
                 </span>
               </div>
 
-              <span className="font-gaegu text-[11px] font-bold text-neutral-800 tracking-wider">
+              <span className="font-gaegu text-xs font-bold text-neutral-800 tracking-wider">
                 {brideBank.bank_name || "BANK BCA:"}
               </span>
-              <span className="font-gaegu text-base font-bold text-neutral-900 tracking-wider my-0.5">
+              <span className="font-gaegu text-lg font-bold text-neutral-900 tracking-wider my-0.5">
                 {brideBank.account_number || "777555231"}
               </span>
-              <span className="font-gaegu text-xs font-bold text-neutral-700">
+              <span className="font-gaegu text-xs font-bold text-neutral-600">
                 {brideBank.owner_name || brideFull}
               </span>
 
-              <button
+              <motion.button
                 type="button"
-                onClick={() => copyToClipboard(brideBank.account_number || "777555231", "Nomor rekening")}
-                className="mt-3 text-[10px] uppercase font-bold tracking-widest bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 text-neutral-800 px-3 py-1 rounded-full transition-colors"
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.94 }}
+                onClick={() => copyToClipboard(brideBank.account_number || "777555231", "Rekening " + (brideBank.nickname || brideNickname))}
+                className="mt-3 text-[11px] uppercase font-bold tracking-widest bg-neutral-900 hover:bg-neutral-800 text-white px-4 py-1.5 rounded-full transition-all shadow-sm"
               >
                 Salin Rekening
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
 
-            {/* Groom Tag */}
-            <div className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-4 shadow-sm hover:shadow-md transition-shadow">
-              {/* Heart Loop Top */}
-              <div className="w-6 h-6 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-6 bg-white mb-2">
-                <span className="text-xs text-neutral-800">♥</span>
+            {/* Groom Tag Card */}
+            <motion.div 
+              whileHover={{ y: -6, rotate: 1 }}
+              transition={{ type: "spring", stiffness: 300 }}
+              className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="w-7 h-7 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-7 bg-white mb-2 shadow-sm">
+                <span className="text-xs text-red-500">♥</span>
               </div>
 
-              {/* Red Badge Name */}
-              <div className="border border-red-600 rounded-full px-3 py-0.5 mb-2">
-                <span className="font-melody text-lg text-red-600 block leading-tight">
+              <div className="border border-red-600 rounded-full px-3.5 py-0.5 mb-2 bg-red-50/50">
+                <span className="font-melody text-xl text-red-600 block leading-tight">
                   {groomBank.nickname || groomNickname}
                 </span>
               </div>
 
-              <span className="font-gaegu text-[11px] font-bold text-neutral-800 tracking-wider">
+              <span className="font-gaegu text-xs font-bold text-neutral-800 tracking-wider">
                 {groomBank.bank_name || "BANK BCA:"}
               </span>
-              <span className="font-gaegu text-base font-bold text-neutral-900 tracking-wider my-0.5">
+              <span className="font-gaegu text-lg font-bold text-neutral-900 tracking-wider my-0.5">
                 {groomBank.account_number || "777555005"}
               </span>
-              <span className="font-gaegu text-xs font-bold text-neutral-700">
+              <span className="font-gaegu text-xs font-bold text-neutral-600">
                 {groomBank.owner_name || groomFull}
               </span>
 
-              <button
+              <motion.button
                 type="button"
-                onClick={() => copyToClipboard(groomBank.account_number || "777555005", "Nomor rekening")}
-                className="mt-3 text-[10px] uppercase font-bold tracking-widest bg-neutral-100 hover:bg-neutral-200 border border-neutral-300 text-neutral-800 px-3 py-1 rounded-full transition-colors"
+                whileHover={{ scale: 1.06 }}
+                whileTap={{ scale: 0.94 }}
+                onClick={() => copyToClipboard(groomBank.account_number || "777555005", "Rekening " + (groomBank.nickname || groomNickname))}
+                className="mt-3 text-[11px] uppercase font-bold tracking-widest bg-neutral-900 hover:bg-neutral-800 text-white px-4 py-1.5 rounded-full transition-all shadow-sm"
               >
                 Salin Rekening
-              </button>
-            </div>
+              </motion.button>
+            </motion.div>
           </div>
 
           {/* Red Note */}
-          <div className="text-center font-gaegu text-xs text-red-600 pt-2 px-4 leading-relaxed font-bold">
+          <div className="text-center font-gaegu text-xs text-red-600 pt-2 px-4 leading-relaxed font-bold bg-red-50/60 max-w-sm mx-auto p-3 rounded-2xl border border-red-200/60">
             <p className="text-sm font-bold">#Note:</p>
-            <p>Before making Transfer/Shipment, please note:</p>
-            <p>- Bank Name, Recipient Name are already in accordance with the couple&apos;s names</p>
-            <p>- Confirm the gift shipment via personal chat to the couple</p>
+            <p>- Pastikan Nama Bank dan Pemilik Rekening sudah sesuai dengan nama pasangan</p>
+            <p>- Konfirmasi pengiriman kado/tanda kasih melalui pesan pribadi kepada mempelai</p>
           </div>
-        </section>
+        </motion.section>
 
-        {/* 6. RSVP SECTION (ARCH ILLUSTRATION) */}
-        <section className="text-center space-y-4 pt-6">
+        {/* 6. RSVP SECTION (ARCH ILLUSTRATION 01-25.png) */}
+        {/* User request: untuk yang gambar ke 2, bikin zoom out si anaknya kaya yg aku kirim gambar ke 3 */}
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center space-y-4 pt-4"
+        >
           <p className="text-xs sm:text-sm font-gaegu tracking-[0.2em] text-neutral-800 uppercase font-bold">
             kindly let us know if you can join us
           </p>
 
+          {/* RSVP Script Title (01-15.png) */}
           <div className="flex justify-center">
-            <img 
+            <motion.img 
+              whileHover={{ scale: 1.06, rotate: [-1, 1, -1] }}
               src={ASSETS.titleRsvp} 
               alt="RSVP" 
               className="w-36 h-auto object-contain select-none pointer-events-none" 
             />
           </div>
 
-          {/* Interactive Arch Card */}
-          <div className="relative max-w-[280px] mx-auto border-2 border-neutral-900 rounded-t-[140px] pt-8 pb-4 px-4 bg-white shadow-md flex flex-col items-center">
-            <h3 className="font-gaegu text-xl font-bold tracking-widest text-neutral-900 mb-4">
-              WILL YOU <br /> BE THERE?
-            </h3>
+          {/* The Exact Arch Illustration from User Image 3 (01-25.png) */}
+          <div className="relative max-w-[280px] sm:max-w-[300px] mx-auto select-none">
+            <motion.div
+              whileHover={{ y: -4 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="relative drop-shadow-md rounded-[50px] overflow-hidden bg-white"
+            >
+              <img 
+                src={ASSETS.rsvpArch} 
+                alt="Will you be there? RSVP Arch" 
+                className="w-full h-auto object-contain pointer-events-none"
+              />
 
-            {/* Checkbox Options */}
-            <div className="space-y-2 text-left mb-4">
-              <label 
-                onClick={() => setWillBeThere("yes")}
-                className="flex items-center gap-2 cursor-pointer font-gaegu text-base font-bold text-neutral-900"
+              {/* Interactive Hitbox Overlay for Checkboxes */}
+              {/* Box 1: Yes! */}
+              <button
+                type="button"
+                onClick={() => {
+                  setWillBeThere("yes");
+                  setRsvpStatus("attending");
+                }}
+                className={`absolute left-[26%] top-[30%] -translate-y-1/2 w-[48%] h-[6%] rounded-md flex items-center px-1 transition-all cursor-pointer ${
+                  willBeThere === "yes" ? "bg-red-500/10 ring-1 ring-red-400" : "hover:bg-neutral-100/50"
+                }`}
+                title="Select Yes!"
               >
-                <span className="w-5 h-5 border-2 border-neutral-900 rounded flex items-center justify-center bg-white">
-                  {willBeThere === "yes" && <span className="text-red-600 text-sm font-black">✓</span>}
-                </span>
-                <span>Yes!</span>
-              </label>
+                {willBeThere === "yes" && (
+                  <motion.span 
+                    initial={{ scale: 0, rotate: -20 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    className="absolute left-[3px] text-red-600 text-lg font-black"
+                  >
+                    ✓
+                  </motion.span>
+                )}
+              </button>
 
-              <label 
-                onClick={() => setWillBeThere("no")}
-                className="flex items-center gap-2 cursor-pointer font-gaegu text-base font-bold text-neutral-900"
+              {/* Box 2: Sorry, can't make it */}
+              <button
+                type="button"
+                onClick={() => {
+                  setWillBeThere("no");
+                  setRsvpStatus("not_attending");
+                }}
+                className={`absolute left-[26%] top-[38%] -translate-y-1/2 w-[58%] h-[6%] rounded-md flex items-center px-1 transition-all cursor-pointer ${
+                  willBeThere === "no" ? "bg-red-500/10 ring-1 ring-red-400" : "hover:bg-neutral-100/50"
+                }`}
+                title="Select Sorry, can't make it"
               >
-                <span className="w-5 h-5 border-2 border-neutral-900 rounded flex items-center justify-center bg-white">
-                  {willBeThere === "no" && <span className="text-red-600 text-sm font-black">✓</span>}
-                </span>
-                <span className="leading-tight">Sorry, can&apos;t make it</span>
-              </label>
-            </div>
-
-            {/* Arch Couple Illustration */}
-            <img 
-              src={ASSETS.couple} 
-              alt="Couple In Arch" 
-              className="w-48 h-auto object-contain select-none pointer-events-none" 
-            />
+                {willBeThere === "no" && (
+                  <motion.span 
+                    initial={{ scale: 0, rotate: -20 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    className="absolute left-[3px] text-red-600 text-lg font-black"
+                  >
+                    ✓
+                  </motion.span>
+                )}
+              </button>
+            </motion.div>
           </div>
-        </section>
+        </motion.section>
 
         {/* 7. ATTENDANCE FORM SECTION */}
-        <section className="text-center space-y-4 pt-6">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center space-y-4 pt-4"
+        >
           <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-4">
             Your presence is our greatest honor
           </p>
 
           <div className="flex justify-center">
-            <img 
+            <motion.img 
+              whileHover={{ scale: 1.05 }}
               src={ASSETS.titleAttendance} 
               alt="Attendance" 
               className="w-40 h-auto object-contain select-none pointer-events-none" 
             />
           </div>
 
-          <form onSubmit={handleRsvpSubmit} className="space-y-4 pt-2 text-left">
+          <form onSubmit={handleRsvpSubmit} className="space-y-4 pt-2 text-left max-w-sm mx-auto">
             {/* Field: Guest Identity */}
             <div>
               <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
@@ -710,7 +837,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                 value={rsvpName}
                 onChange={(e) => setRsvpName(e.target.value)}
                 placeholder="Guest Name"
-                className="w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white"
+                className="w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white transition-all"
               />
             </div>
 
@@ -724,44 +851,52 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                 value={rsvpEmail}
                 onChange={(e) => setRsvpEmail(e.target.value)}
                 placeholder="To Receive your digital invitation"
-                className="w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white"
+                className="w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white transition-all"
               />
             </div>
 
-            {/* Field: WhatsApp Number */}
+            {/* Field: Number of Guests */}
             <div>
               <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
-                WhatsApp Number
+                Number of Guests
               </label>
-              <input
-                type="tel"
-                value={rsvpPhone}
-                onChange={(e) => setRsvpPhone(e.target.value)}
-                placeholder="Example: 081955562"
-                className="w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white"
-              />
+              <select
+                value={guestCount}
+                onChange={(e) => setGuestCount(Number(e.target.value))}
+                className="w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white transition-all cursor-pointer"
+              >
+                <option value={1}>1 Person</option>
+                <option value={2}>2 Persons</option>
+                <option value={3}>3 Persons</option>
+              </select>
             </div>
 
-            {/* Field: Confirmation Status */}
+            {/* Field: Confirmation Presence Status */}
             <div>
               <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
-                Confirmation
+                Confirmation of Presence
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => setWillBeThere("yes")}
-                  className={`border-2 border-neutral-900 rounded-full py-2 px-3 font-gaegu text-xs font-bold transition-colors ${
-                    willBeThere === "yes" ? "bg-neutral-900 text-white" : "bg-white text-neutral-900 hover:bg-neutral-50"
+                  onClick={() => {
+                    setRsvpStatus("attending");
+                    setWillBeThere("yes");
+                  }}
+                  className={`py-2 px-4 rounded-full font-gaegu font-bold text-sm border-2 border-neutral-900 transition-all ${
+                    rsvpStatus === "attending" ? "bg-neutral-900 text-white shadow-sm" : "bg-white text-neutral-800 hover:bg-neutral-100"
                   }`}
                 >
-                  ✓ Hadir
+                  ✓ Hadir (Yes!)
                 </button>
                 <button
                   type="button"
-                  onClick={() => setWillBeThere("no")}
-                  className={`border-2 border-neutral-900 rounded-full py-2 px-3 font-gaegu text-xs font-bold transition-colors ${
-                    willBeThere === "no" ? "bg-neutral-900 text-white" : "bg-white text-neutral-900 hover:bg-neutral-50"
+                  onClick={() => {
+                    setRsvpStatus("not_attending");
+                    setWillBeThere("no");
+                  }}
+                  className={`py-2 px-4 rounded-full font-gaegu font-bold text-sm border-2 border-neutral-900 transition-all ${
+                    rsvpStatus === "not_attending" ? "bg-neutral-900 text-white shadow-sm" : "bg-white text-neutral-800 hover:bg-neutral-100"
                   }`}
                 >
                   ✕ Tidak Hadir
@@ -769,128 +904,172 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               </div>
             </div>
 
-            {/* Field: Total Persons */}
-            {willBeThere === "yes" && (
-              <div>
-                <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
-                  Total Persons
-                </label>
-                <div className="flex items-center justify-between border-2 border-neutral-900 rounded-full px-5 py-2 bg-white">
-                  <button
-                    type="button"
-                    onClick={() => setRsvpGuestsCount(Math.max(1, rsvpGuestsCount - 1))}
-                    className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-lg text-neutral-900 active:scale-90"
-                  >
-                    -
-                  </button>
-                  <span className="font-gaegu text-sm font-bold text-neutral-900 tracking-wider">
-                    {rsvpGuestsCount} GUEST{rsvpGuestsCount > 1 ? "S" : ""}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setRsvpGuestsCount(Math.min(5, rsvpGuestsCount + 1))}
-                    className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-lg text-neutral-900 active:scale-90"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Submit Button */}
-            <div className="pt-2">
-              <button
+            {/* Confirm Presence Button */}
+            <div className="pt-3 flex justify-center">
+              <motion.button
                 type="submit"
-                disabled={isSubmittingRsvp}
-                className="w-full bg-neutral-900 text-white font-gaegu font-bold text-sm tracking-widest py-3.5 rounded-full hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-md disabled:opacity-50"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                disabled={rsvpSubmitting}
+                className="relative group select-none"
               >
-                {isSubmittingRsvp ? "MENYIMPAN..." : "CONFIRM PRESENCE"}
-              </button>
+                <img 
+                  src={ASSETS.btnConfirmPresence} 
+                  alt="Confirm Presence" 
+                  className="w-44 h-auto object-contain drop-shadow-sm group-hover:drop-shadow-md transition-all" 
+                />
+              </motion.button>
             </div>
+
+            {rsvpSuccess && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center text-xs font-gaegu font-bold text-emerald-600 bg-emerald-50 py-2 rounded-xl border border-emerald-200 mt-2"
+              >
+                Terima kasih! Konfirmasi kehadiran Anda telah tersimpan.
+              </motion.div>
+            )}
           </form>
-        </section>
+        </motion.section>
 
         {/* 8. BLESSINGS & WISHES SECTION */}
-        <section className="text-center space-y-4 pt-6">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center space-y-4 pt-4"
+        >
+          <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-4">
+            Give your blessing for us
+          </p>
+
           <div className="flex justify-center">
-            <img 
+            <motion.img 
+              whileHover={{ scale: 1.05 }}
               src={ASSETS.titleBlessings} 
-              alt="Blessings" 
-              className="w-36 h-auto object-contain select-none pointer-events-none" 
+              alt="Blessings & Wishes" 
+              className="w-44 h-auto object-contain select-none pointer-events-none" 
             />
           </div>
 
-          <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-4">
-            Send your warm wishes and prayers to the couple
-          </p>
+          <form onSubmit={handleWishSubmit} className="space-y-4 pt-2 text-left max-w-sm mx-auto">
+            {/* Sender Name */}
+            <div>
+              <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
+                Name
+              </label>
+              <input
+                type="text"
+                required
+                value={wishName}
+                onChange={(e) => setWishName(e.target.value)}
+                placeholder="Your Name"
+                className="w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white transition-all"
+              />
+            </div>
 
-          <form onSubmit={handleWishSubmit} className="space-y-3 pt-2 text-left">
-            <input
-              type="text"
-              required
-              value={wishName}
-              onChange={(e) => setWishName(e.target.value)}
-              placeholder="Your Name"
-              className="w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white"
-            />
+            {/* Message / Prayer */}
+            <div>
+              <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
+                Prayers &amp; Wishes
+              </label>
+              <textarea
+                required
+                rows={3}
+                value={wishMessage}
+                onChange={(e) => setWishMessage(e.target.value)}
+                placeholder="Write your warmest wishes for the bride & groom..."
+                className="w-full border-2 border-neutral-900 rounded-2xl px-5 py-3 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white resize-none transition-all"
+              />
+            </div>
 
-            <textarea
-              rows={3}
-              required
-              value={wishMessage}
-              onChange={(e) => setWishMessage(e.target.value)}
-              placeholder="Write your prayers and warm wishes here..."
-              className="w-full border-2 border-neutral-900 rounded-2xl px-5 py-3 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white resize-none"
-            />
+            {/* Submit Blessing Button */}
+            <div className="pt-2 flex justify-center">
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                disabled={wishSubmitting}
+                className="relative group select-none"
+              >
+                <img 
+                  src={ASSETS.btnSubmitBlessing} 
+                  alt="Submit Blessing" 
+                  className="w-44 h-auto object-contain drop-shadow-sm group-hover:drop-shadow-md transition-all" 
+                />
+              </motion.button>
+            </div>
 
-            <button
-              type="submit"
-              disabled={isSubmittingWish}
-              className="w-full bg-neutral-900 text-white font-gaegu font-bold text-sm tracking-widest py-3.5 rounded-full hover:bg-neutral-800 active:scale-[0.98] transition-all shadow-md disabled:opacity-50"
-            >
-              {isSubmittingWish ? "MENGIRIM..." : "SUBMIT BLESSING"}
-            </button>
+            {wishSuccess && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-center text-xs font-gaegu font-bold text-emerald-600 bg-emerald-50 py-2 rounded-xl border border-emerald-200 mt-2"
+              >
+                Terima kasih atas doa dan ucapan hangatnya!
+              </motion.div>
+            )}
           </form>
 
-          {/* Wishes Feed */}
-          <div className="space-y-3 pt-4 text-left max-h-[360px] overflow-y-auto pr-1">
-            {wishesList.length === 0 ? (
-              <p className="text-center text-xs font-gaegu text-neutral-500 py-4">
-                Belum ada ucapan. Jadilah yang pertama memberikan doa restu!
-              </p>
-            ) : (
-              wishesList.map((w, idx) => (
-                <div key={idx} className="border-2 border-neutral-900 rounded-2xl p-4 bg-white shadow-sm space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-gaegu font-bold text-sm text-neutral-900">
+          {/* Live Wishes Wall Cards */}
+          <div className="pt-6 space-y-3 max-w-sm mx-auto text-left">
+            <div className="flex items-center justify-between px-2">
+              <span className="font-gaegu text-xs font-bold text-neutral-500 uppercase tracking-widest">
+                Wishes Wall ({wishesList.length})
+              </span>
+              <span className="text-red-500 font-bold text-xs">♥ with love</span>
+            </div>
+
+            <div className="space-y-3 max-h-80 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-neutral-300">
+              {wishesList.map((w, idx) => (
+                <motion.div
+                  key={w.id || idx}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: idx * 0.08 }}
+                  whileHover={{ scale: 1.02 }}
+                  className={`bg-white border-2 border-neutral-900 rounded-2xl p-4 shadow-sm relative overflow-hidden transition-all ${
+                    idx % 2 === 0 ? "rotate-[-0.5deg]" : "rotate-[0.5deg]"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <h5 className="font-gaegu font-bold text-sm text-neutral-900">
                       {w.name}
-                    </span>
-                    <span className="text-[10px] text-neutral-400 font-gaegu">
-                      {new Date(w.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short" })}
+                    </h5>
+                    <span className="text-[10px] font-gaegu font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                      {"Hadir"}
                     </span>
                   </div>
                   <p className="font-gaegu text-xs text-neutral-700 leading-relaxed">
                     {w.message}
                   </p>
-                </div>
-              ))
-            )}
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* 9. FOOTER */}
-        <footer className="text-center pt-8 pb-4 border-t border-neutral-200">
-          <p className="font-melody text-2xl text-neutral-900 mb-1">
+        <footer className="text-center space-y-3 pt-10 pb-6 border-t border-neutral-200/60">
+          <p className="font-melody text-2xl text-neutral-900">
             {brideNickname} &amp; {groomNickname}
           </p>
-          <a
-            href="https://serastory.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[11px] font-gaegu tracking-widest text-neutral-500 hover:text-neutral-900 uppercase transition-colors"
-          >
-            Created with love by Sera Story
-          </a>
+          <p className="font-gaegu text-xs text-neutral-500 tracking-wider">
+            Thank you for being part of our special love story.
+          </p>
+          <div className="pt-2">
+            <a 
+              href="https://www.serastory.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-[10px] font-gaegu font-bold text-neutral-400 hover:text-neutral-700 transition-colors uppercase tracking-widest"
+            >
+              <span>Crafted with ♥ by SERA STORY</span>
+            </a>
+          </div>
         </footer>
 
       </div>
