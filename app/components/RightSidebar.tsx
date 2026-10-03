@@ -30,7 +30,7 @@ export const ASSETS = {
   btnConfirmPresence: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-22.png",
   btnSubmitBlessing: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-23.png",
   cardContainer: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-24.png",
-  rsvpArch: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-25.png",
+  rsvpArch: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-25.png?v=3",
   topRings: "https://cdn.serastory.com/undangan/templates/illustrated-love-story-01/01-26.png",
 };
 
@@ -714,7 +714,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             />
           </div>
 
-          {/* The Exact Arch Illustration from User Image 3 (01-25.png) */}
+          {/* The Exact Arch Illustration with Dynamic User-Controlled Checkmarks */}
           <div className="relative max-w-[280px] sm:max-w-[300px] mx-auto select-none">
             <div className="relative drop-shadow-md rounded-[50px] overflow-hidden bg-white">
               <img 
@@ -722,6 +722,78 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                 alt="Will you be there? RSVP Arch" 
                 className="w-full h-auto object-contain pointer-events-none" 
               />
+
+              {/* Interactive Row 1: Yes! */}
+              <button
+                type="button"
+                onClick={() => {
+                  setWillBeThere("yes");
+                  setRsvpStatus("attending");
+                }}
+                className="absolute left-[31%] top-[28%] w-[45%] h-[6%] flex items-center cursor-pointer group rounded-md transition-colors hover:bg-neutral-100/40"
+                title="Pilih Hadir (Yes!)"
+              >
+                <span className="sr-only">Hadir (Yes!)</span>
+              </button>
+
+              {/* Dynamic Checkmark for Box 1 (Yes!) */}
+              <AnimatePresence>
+                {willBeThere === "yes" && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0, rotate: -20 }}
+                    animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 450, damping: 22 }}
+                    className="absolute left-[32.6%] top-[29.1%] w-[5.5%] h-[4.2%] pointer-events-none flex items-center justify-center"
+                  >
+                    <svg viewBox="0 0 28 24" fill="none" className="w-full h-full drop-shadow-xs">
+                      <path 
+                        d="M3 13.5L10 20.5L25 3.5" 
+                        stroke="#dc2626" 
+                        strokeWidth="4.5" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                      />
+                    </svg>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Interactive Row 2: Sorry, can't make it */}
+              <button
+                type="button"
+                onClick={() => {
+                  setWillBeThere("no");
+                  setRsvpStatus("not_attending");
+                }}
+                className="absolute left-[31%] top-[35%] w-[55%] h-[8.5%] flex items-center cursor-pointer group rounded-md transition-colors hover:bg-neutral-100/40"
+                title="Pilih Tidak Hadir (Sorry, can't make it)"
+              >
+                <span className="sr-only">Tidak Hadir (Sorry, can't make it)</span>
+              </button>
+
+              {/* Dynamic Checkmark for Box 2 (Sorry, cant make it) */}
+              <AnimatePresence>
+                {willBeThere === "no" && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0, rotate: -20 }}
+                    animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 450, damping: 22 }}
+                    className="absolute left-[32.6%] top-[35.8%] w-[5.5%] h-[4.2%] pointer-events-none flex items-center justify-center"
+                  >
+                    <svg viewBox="0 0 28 24" fill="none" className="w-full h-full drop-shadow-xs">
+                      <path 
+                        d="M3 13.5L10 20.5L25 3.5" 
+                        stroke="#dc2626" 
+                        strokeWidth="4.5" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                      />
+                    </svg>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </section>
