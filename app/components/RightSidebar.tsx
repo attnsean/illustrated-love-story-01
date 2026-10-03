@@ -253,7 +253,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-[#fdfbf7] text-neutral-900 overflow-x-hidden selection:bg-red-500 selection:text-white">
+    <div className="relative w-full md:w-[42%] lg:w-[38%] min-h-[100dvh] md:h-[100dvh] md:overflow-y-auto md:overflow-x-hidden bg-[#faf9f6] text-neutral-900 selection:bg-red-500 selection:text-white border-l border-neutral-200 shadow-2xl flex-shrink-0">
       {/* Audio Element */}
       <audio ref={audioRef} src="/audio/bgm.mp3" loop preload="auto" />
 
@@ -614,127 +614,100 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         </motion.section>
 
         {/* 5. WEDDING GIFT SECTION */}
-        <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.6 }}
-          className="text-center space-y-4 pt-4"
-        >
-          <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-4 leading-relaxed">
-            Your prayer and blessing are the greatest gifts of all. However, if you wish to give a token of love:
-          </p>
-
-          <div className="flex justify-center">
-            <motion.img 
-              whileHover={{ scale: 1.05 }}
-              src={ASSETS.titleWeddingGift} 
-              alt="Wedding Gift" 
-              className="w-44 h-auto object-contain select-none pointer-events-none" 
-            />
+        <section className="text-center space-y-4 pt-4">
+          <div className="flex justify-center mb-2">
+            <h3 className="font-melody text-5xl sm:text-6xl text-neutral-900 leading-tight">
+              Wedding <br /> Gift
+            </h3>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-sm mx-auto pt-4">
+          <div className="grid grid-cols-2 gap-3 pt-3">
             {/* Bride Tag Card */}
-            <motion.div 
-              whileHover={{ y: -6, rotate: -1 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="w-7 h-7 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-7 bg-white mb-2 shadow-sm">
+            <div className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-4 sm:p-5 shadow-sm">
+              {/* Heart Loop Top */}
+              <div className="w-7 h-7 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-7 bg-white mb-2 shadow-xs">
                 <span className="text-xs text-red-500">♥</span>
               </div>
 
-              <div className="border border-red-600 rounded-full px-3.5 py-0.5 mb-2 bg-red-50/50">
-                <span className="font-melody text-xl text-red-600 block leading-tight">
+              {/* Red Badge Name */}
+              <div className="border border-red-500 rounded-full px-4 py-0.5 mb-2 bg-transparent">
+                <span className="font-melody text-xl sm:text-2xl text-red-500 block leading-tight">
                   {brideBank.nickname || brideNickname}
                 </span>
               </div>
 
-              <span className="font-gaegu text-xs font-bold text-neutral-800 tracking-wider">
+              <span className="font-melody text-sm sm:text-base italic text-neutral-800 tracking-wider">
                 {brideBank.bank_name || "BANK BCA:"}
               </span>
-              <span className="font-gaegu text-lg font-bold text-neutral-900 tracking-wider my-0.5">
+              <span className="font-serif font-bold text-lg sm:text-xl text-neutral-900 tracking-wider my-0.5">
                 {brideBank.account_number || "777555231"}
               </span>
-              <span className="font-gaegu text-xs font-bold text-neutral-600">
+              <span className="font-melody text-xs sm:text-sm text-neutral-700">
                 {brideBank.owner_name || brideFull}
               </span>
 
-              <motion.button
+              <button
                 type="button"
-                whileHover={{ scale: 1.06 }}
-                whileTap={{ scale: 0.94 }}
-                onClick={() => copyToClipboard(brideBank.account_number || "777555231", "Rekening " + (brideBank.nickname || brideNickname))}
-                className="mt-3 text-[11px] uppercase font-bold tracking-widest bg-neutral-900 hover:bg-neutral-800 text-white px-4 py-1.5 rounded-full transition-all shadow-sm"
+                onClick={() => copyToClipboard(brideBank.account_number || "777555231", "Nomor rekening")}
+                className="mt-3 w-full py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex flex-col items-center justify-center transition-colors shadow-sm"
               >
-                Salin Rekening
-              </motion.button>
-            </motion.div>
+                <span className="font-melody text-xs sm:text-sm tracking-widest uppercase leading-none">SALIN</span>
+                <span className="font-melody text-xs sm:text-sm tracking-widest uppercase leading-none mt-0.5">REKENING</span>
+              </button>
+            </div>
 
             {/* Groom Tag Card */}
-            <motion.div 
-              whileHover={{ y: -6, rotate: 1 }}
-              transition={{ type: "spring", stiffness: 300 }}
-              className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-5 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className="w-7 h-7 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-7 bg-white mb-2 shadow-sm">
+            <div className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-4 sm:p-5 shadow-sm">
+              {/* Heart Loop Top */}
+              <div className="w-7 h-7 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-7 bg-white mb-2 shadow-xs">
                 <span className="text-xs text-red-500">♥</span>
               </div>
 
-              <div className="border border-red-600 rounded-full px-3.5 py-0.5 mb-2 bg-red-50/50">
-                <span className="font-melody text-xl text-red-600 block leading-tight">
+              {/* Red Badge Name */}
+              <div className="border border-red-500 rounded-full px-4 py-0.5 mb-2 bg-transparent">
+                <span className="font-melody text-xl sm:text-2xl text-red-500 block leading-tight">
                   {groomBank.nickname || groomNickname}
                 </span>
               </div>
 
-              <span className="font-gaegu text-xs font-bold text-neutral-800 tracking-wider">
+              <span className="font-melody text-sm sm:text-base italic text-neutral-800 tracking-wider">
                 {groomBank.bank_name || "BANK BCA:"}
               </span>
-              <span className="font-gaegu text-lg font-bold text-neutral-900 tracking-wider my-0.5">
+              <span className="font-serif font-bold text-lg sm:text-xl text-neutral-900 tracking-wider my-0.5">
                 {groomBank.account_number || "777555005"}
               </span>
-              <span className="font-gaegu text-xs font-bold text-neutral-600">
+              <span className="font-melody text-xs sm:text-sm text-neutral-700">
                 {groomBank.owner_name || groomFull}
               </span>
 
-              <motion.button
+              <button
                 type="button"
-                whileHover={{ scale: 1.06 }}
-                whileTap={{ scale: 0.94 }}
-                onClick={() => copyToClipboard(groomBank.account_number || "777555005", "Rekening " + (groomBank.nickname || groomNickname))}
-                className="mt-3 text-[11px] uppercase font-bold tracking-widest bg-neutral-900 hover:bg-neutral-800 text-white px-4 py-1.5 rounded-full transition-all shadow-sm"
+                onClick={() => copyToClipboard(groomBank.account_number || "777555005", "Nomor rekening")}
+                className="mt-3 w-full py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex flex-col items-center justify-center transition-colors shadow-sm"
               >
-                Salin Rekening
-              </motion.button>
-            </motion.div>
+                <span className="font-melody text-xs sm:text-sm tracking-widest uppercase leading-none">SALIN</span>
+                <span className="font-melody text-xs sm:text-sm tracking-widest uppercase leading-none mt-0.5">REKENING</span>
+              </button>
+            </div>
           </div>
 
-          {/* Red Note */}
-          <div className="text-center font-gaegu text-xs text-red-600 pt-2 px-4 leading-relaxed font-bold bg-red-50/60 max-w-sm mx-auto p-3 rounded-2xl border border-red-200/60">
-            <p className="text-sm font-bold">#Note:</p>
-            <p>- Pastikan Nama Bank dan Pemilik Rekening sudah sesuai dengan nama pasangan</p>
-            <p>- Konfirmasi pengiriman kado/tanda kasih melalui pesan pribadi kepada mempelai</p>
+          {/* Red Note Box */}
+          <div className="mt-5 p-4 rounded-2xl border border-red-200 bg-red-50/50 text-center font-melody text-red-600 space-y-1">
+            <p className="text-base sm:text-lg font-bold italic">#Note:</p>
+            <p className="text-xs sm:text-sm leading-snug italic">- Pastikan Nama Bank dan Pemilik Rekening sudah sesuai dengan nama pasangan</p>
+            <p className="text-xs sm:text-sm leading-snug italic">- Konfirmasi pengiriman kado/tanda kasih melalui pesan pribadi kepada mempelai</p>
           </div>
-        </motion.section>
+        </section>
 
         {/* 6. RSVP SECTION (ARCH ILLUSTRATION 01-25.png) */}
-        {/* User request: untuk yang gambar ke 2, bikin zoom out si anaknya kaya yg aku kirim gambar ke 3 */}
-        <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.6 }}
-          className="text-center space-y-4 pt-4"
-        >
+        <section className="text-center space-y-4 pt-4">
           <p className="text-xs sm:text-sm font-gaegu tracking-[0.2em] text-neutral-800 uppercase font-bold">
             kindly let us know if you can join us
           </p>
 
           {/* RSVP Script Title (01-15.png) */}
           <div className="flex justify-center">
-            <motion.img 
-              whileHover={{ scale: 1.06, rotate: [-1, 1, -1] }}
+            <img 
               src={ASSETS.titleRsvp} 
               alt="RSVP" 
               className="w-36 h-auto object-contain select-none pointer-events-none" 
@@ -743,66 +716,15 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
           {/* The Exact Arch Illustration from User Image 3 (01-25.png) */}
           <div className="relative max-w-[280px] sm:max-w-[300px] mx-auto select-none">
-            <motion.div
-              whileHover={{ y: -4 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="relative drop-shadow-md rounded-[50px] overflow-hidden bg-white"
-            >
+            <div className="relative drop-shadow-md rounded-[50px] overflow-hidden bg-white">
               <img 
                 src={ASSETS.rsvpArch} 
                 alt="Will you be there? RSVP Arch" 
-                className="w-full h-auto object-contain pointer-events-none"
+                className="w-full h-auto object-contain pointer-events-none" 
               />
-
-              {/* Interactive Hitbox Overlay for Checkboxes */}
-              {/* Box 1: Yes! */}
-              <button
-                type="button"
-                onClick={() => {
-                  setWillBeThere("yes");
-                  setRsvpStatus("attending");
-                }}
-                className={`absolute left-[26%] top-[30%] -translate-y-1/2 w-[48%] h-[6%] rounded-md flex items-center px-1 transition-all cursor-pointer ${
-                  willBeThere === "yes" ? "bg-red-500/10 ring-1 ring-red-400" : "hover:bg-neutral-100/50"
-                }`}
-                title="Select Yes!"
-              >
-                {willBeThere === "yes" && (
-                  <motion.span 
-                    initial={{ scale: 0, rotate: -20 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    className="absolute left-[3px] text-red-600 text-lg font-black"
-                  >
-                    ✓
-                  </motion.span>
-                )}
-              </button>
-
-              {/* Box 2: Sorry, can't make it */}
-              <button
-                type="button"
-                onClick={() => {
-                  setWillBeThere("no");
-                  setRsvpStatus("not_attending");
-                }}
-                className={`absolute left-[26%] top-[38%] -translate-y-1/2 w-[58%] h-[6%] rounded-md flex items-center px-1 transition-all cursor-pointer ${
-                  willBeThere === "no" ? "bg-red-500/10 ring-1 ring-red-400" : "hover:bg-neutral-100/50"
-                }`}
-                title="Select Sorry, can't make it"
-              >
-                {willBeThere === "no" && (
-                  <motion.span 
-                    initial={{ scale: 0, rotate: -20 }}
-                    animate={{ scale: 1, rotate: 0 }}
-                    className="absolute left-[3px] text-red-600 text-lg font-black"
-                  >
-                    ✓
-                  </motion.span>
-                )}
-              </button>
-            </motion.div>
+            </div>
           </div>
-        </motion.section>
+        </section>
 
         {/* 7. ATTENDANCE FORM SECTION */}
         <motion.section 
