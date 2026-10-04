@@ -472,7 +472,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                       {!isEven ? (
                         <motion.span 
                           whileHover={{ scale: 1.08 }}
-                          className="font-melody text-3xl sm:text-4xl text-red-600 block leading-tight cursor-default"
+                          className="font-gaegu font-bold text-3xl sm:text-4xl text-red-600 block leading-tight cursor-default tracking-wider"
                         >
                           {item.year || "2019"}
                         </motion.span>
@@ -508,7 +508,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                       {isEven ? (
                         <motion.span 
                           whileHover={{ scale: 1.08 }}
-                          className="font-melody text-3xl sm:text-4xl text-red-600 block leading-tight cursor-default"
+                          className="font-gaegu font-bold text-3xl sm:text-4xl text-red-600 block leading-tight cursor-default tracking-wider"
                         >
                           {item.year || "2020"}
                         </motion.span>
@@ -610,24 +610,11 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                 </span>
               </div>
 
-              <span className="font-melody text-sm sm:text-base italic text-neutral-800 tracking-wider">
-                {brideBank.bank_name || "BANK BCA:"}
-              </span>
-              <span className="font-serif font-bold text-lg sm:text-xl text-neutral-900 tracking-wider my-0.5">
-                {brideBank.account_number || "777555231"}
-              </span>
-              <span className="font-melody text-xs sm:text-sm text-neutral-700">
-                {brideBank.owner_name || brideFull}
-              </span>
+              <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{brideBank.bank_name || "BANK BCA:"}</span>
+              <span className="font-gaegu font-bold text-2xl sm:text-3xl text-neutral-900 tracking-widest my-0.5 select-all">{brideBank.account_number || "777555231"}</span>
+              <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {brideBank.owner_name || brideFull}</span>
 
-              <button
-                type="button"
-                onClick={() => copyToClipboard(brideBank.account_number || "777555231", "Nomor rekening")}
-                className="mt-3 w-full py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex flex-col items-center justify-center transition-colors shadow-sm"
-              >
-                <span className="font-melody text-xs sm:text-sm tracking-widest uppercase leading-none">SALIN</span>
-                <span className="font-melody text-xs sm:text-sm tracking-widest uppercase leading-none mt-0.5">REKENING</span>
-              </button>
+              <button type="button" onClick={() => copyToClipboard(brideBank.account_number || "777555231", "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></button>
             </div>
 
             {/* Groom Tag Card */}
@@ -644,33 +631,16 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                 </span>
               </div>
 
-              <span className="font-melody text-sm sm:text-base italic text-neutral-800 tracking-wider">
-                {groomBank.bank_name || "BANK BCA:"}
-              </span>
-              <span className="font-serif font-bold text-lg sm:text-xl text-neutral-900 tracking-wider my-0.5">
-                {groomBank.account_number || "777555005"}
-              </span>
-              <span className="font-melody text-xs sm:text-sm text-neutral-700">
-                {groomBank.owner_name || groomFull}
-              </span>
+              <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{groomBank.bank_name || "BANK BCA:"}</span>
+              <span className="font-gaegu font-bold text-2xl sm:text-3xl text-neutral-900 tracking-widest my-0.5 select-all">{groomBank.account_number || "777555005"}</span>
+              <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {groomBank.owner_name || groomFull}</span>
 
-              <button
-                type="button"
-                onClick={() => copyToClipboard(groomBank.account_number || "777555005", "Nomor rekening")}
-                className="mt-3 w-full py-2 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex flex-col items-center justify-center transition-colors shadow-sm"
-              >
-                <span className="font-melody text-xs sm:text-sm tracking-widest uppercase leading-none">SALIN</span>
-                <span className="font-melody text-xs sm:text-sm tracking-widest uppercase leading-none mt-0.5">REKENING</span>
-              </button>
+              <button type="button" onClick={() => copyToClipboard(groomBank.account_number || "777555005", "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></button>
             </div>
           </div>
 
           {/* Red Note Box */}
-          <div className="mt-5 p-4 rounded-2xl border border-red-200 bg-red-50/50 text-center font-melody text-red-600 space-y-1">
-            <p className="text-base sm:text-lg font-bold italic">#Note:</p>
-            <p className="text-xs sm:text-sm leading-snug italic">- Pastikan Nama Bank dan Pemilik Rekening sudah sesuai dengan nama pasangan</p>
-            <p className="text-xs sm:text-sm leading-snug italic">- Konfirmasi pengiriman kado/tanda kasih melalui pesan pribadi kepada mempelai</p>
-          </div>
+          <div className="mt-5 p-4 rounded-2xl border border-red-200 bg-red-50/50 text-center font-gaegu text-red-600 space-y-1"><p className="text-base sm:text-lg font-bold">#Note:</p><p className="text-xs sm:text-sm font-bold leading-snug">- Pastikan Nama Bank dan Pemilik Rekening sudah sesuai dengan nama pasangan</p><p className="text-xs sm:text-sm font-bold leading-snug">- Konfirmasi pengiriman kado/tanda kasih melalui pesan pribadi kepada mempelai</p></div>
         </section>
 
         {/* 6. RSVP SECTION (ARCH ILLUSTRATION 01-25.png) */}
