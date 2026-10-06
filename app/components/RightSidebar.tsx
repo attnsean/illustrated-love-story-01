@@ -229,7 +229,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   return (
     <div className="relative w-full md:w-[42%] lg:w-[38%] min-h-[100dvh] md:h-[100dvh] md:overflow-y-auto md:overflow-x-hidden bg-[#faf9f6] text-neutral-900 selection:bg-red-500 selection:text-white border-l border-neutral-200 shadow-2xl flex-shrink-0">
       {/* Audio Element */}
-      <audio ref={audioRef} src="/audio/bgm.mp3" loop preload="auto" />
+      <audio ref={audioRef} src={project?.music_url || "/audio/bgm.mp3"} loop preload="auto" />
 
       {/* Floating Ambient Doodles & Hearts in Background */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30">
