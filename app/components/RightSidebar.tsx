@@ -106,13 +106,19 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
     if (!isOpened) {
       document.body.style.overflow = "hidden";
       document.documentElement.style.overflow = "hidden";
+      document.body.style.touchAction = "none";
+      document.documentElement.style.touchAction = "none";
     } else {
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
+      document.body.style.touchAction = "";
+      document.documentElement.style.touchAction = "";
     }
     return () => {
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
+      document.body.style.touchAction = "";
+      document.documentElement.style.touchAction = "";
     };
   }, [isOpened]);
 
@@ -252,7 +258,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   };
 
   return (
-    <div className={`relative w-full md:w-[42%] lg:w-[38%] ${isOpened ? "min-h-[100dvh] md:h-[100dvh] md:overflow-y-auto md:overflow-x-hidden" : "h-[100dvh] max-h-[100dvh] overflow-hidden"} bg-[#faf9f6] text-neutral-900 selection:bg-red-500 selection:text-white border-l border-neutral-200 shadow-2xl flex-shrink-0`}>
+    <div className={`relative w-full md:w-[42%] lg:w-[38%] ${isOpened ? "min-h-[100dvh] md:h-[100dvh] md:overflow-y-auto md:overflow-x-hidden" : "h-[100dvh] max-h-[100dvh] overflow-hidden overscroll-none touch-none"} bg-[#faf9f6] text-neutral-900 selection:bg-red-500 selection:text-white border-l border-neutral-200 shadow-2xl flex-shrink-0`}>
       {/* Audio Element */}
       <audio ref={audioRef} src={project?.music_url || "/audio/bgm.mp3"} loop preload="auto" />
 
@@ -317,7 +323,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             initial={{ opacity: 1, y: 0 }}
             exit={{ y: "-100%", opacity: 0 }}
             transition={{ duration: 0.85, ease: [0.65, 0, 0.35, 1] }}
-            className="fixed md:absolute inset-0 z-50 h-[100dvh] max-h-[100dvh] w-full flex flex-col justify-between items-center text-center px-4 sm:px-6 py-3 sm:py-5 overflow-hidden select-none bg-[#faf9f6]"
+            className="fixed md:absolute inset-0 z-50 h-[100dvh] max-h-[100dvh] w-full flex flex-col justify-between items-center text-center px-4 sm:px-6 py-2.5 sm:py-4 overflow-hidden select-none touch-none overscroll-none bg-[#faf9f6]"
           >
             {/* Ambient Floating Hearts & Doodles in Cover */}
             <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-35">
@@ -365,26 +371,26 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             </div>
 
             {/* Center: Couple Illustration or Custom Cover Photo */}
-            <div className="relative z-10 my-auto flex-1 min-h-0 flex flex-col items-center justify-center py-1 w-full max-w-xs">
+            <div className="relative z-10 my-auto flex-1 min-h-0 w-full max-w-sm sm:max-w-md flex flex-col items-center justify-center py-1 sm:py-2 px-2 overflow-hidden">
               {coverPhoto ? (
-                <div className="relative max-h-[30vh] aspect-[4/5] rounded-2xl overflow-hidden border-3 border-neutral-900 shadow-xl bg-white p-1.5">
+                <div className="relative flex-1 min-h-0 max-h-[46vh] sm:max-h-[50vh] aspect-[4/5] rounded-2xl overflow-hidden border-3 border-neutral-900 shadow-xl bg-white p-1.5 flex items-center justify-center">
                   <img src={coverPhoto} alt="Cover Photo" className="w-full h-full object-cover rounded-xl" />
                 </div>
               ) : (
                 <motion.div
                   animate={{ y: [0, -4, 0] }}
                   transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
-                  className="flex justify-center items-center flex-1 min-h-0 max-h-[32vh]"
+                  className="flex justify-center items-center flex-1 min-h-0 w-full overflow-hidden"
                 >
                   <img
                     src={ASSETS.couple}
                     alt="Illustrated Couple"
-                    className="max-h-[30vh] max-w-[85%] w-auto h-auto object-contain select-none pointer-events-none drop-shadow-md"
+                    className="max-h-[44vh] sm:max-h-[48vh] max-w-[95%] sm:max-w-full w-auto h-auto object-contain select-none pointer-events-none drop-shadow-md transition-all"
                   />
                 </motion.div>
               )}
 
-              <div className="mt-2 inline-block px-3.5 py-0.5 rounded-full border border-neutral-300 bg-white/85 shadow-xs shrink-0">
+              <div className="mt-2 sm:mt-2.5 inline-block px-4 py-0.5 rounded-full border border-neutral-300 bg-white/90 shadow-xs shrink-0">
                 <p className="font-gaegu font-bold text-xs sm:text-sm tracking-widest text-neutral-800">
                   {formattedDate}
                 </p>
@@ -392,7 +398,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             </div>
 
             {/* Bottom: Guest Greeting & "Buka Undangan" Button */}
-            <div className="relative z-10 w-full max-w-xs space-y-2 pb-1 shrink-0">
+            <div className="relative z-10 w-full max-w-xs sm:max-w-sm space-y-2 pb-1 shrink-0">
               <div className="space-y-0.5">
                 <p className="font-gaegu font-bold text-[11px] sm:text-xs text-neutral-500">
                   Kepada Yth. Bapak/Ibu/Saudara/i:

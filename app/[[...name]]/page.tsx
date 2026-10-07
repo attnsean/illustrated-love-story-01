@@ -195,7 +195,7 @@ export default async function Home({ params }: Props) {
             <img 
               src={ASSETS.couple} 
               alt="Illustrated Couple" 
-              className="w-44 h-auto object-contain select-none pointer-events-none"
+              className="w-52 h-auto max-h-[220px] object-contain select-none pointer-events-none"
             />
           </div>
         </div>
