@@ -88,6 +88,9 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
     nickname: groomNickname,
   };
 
+  const coverPhoto = (!isDefaultStorageUrl(project?.opening_photo_url) ? project?.opening_photo_url : null)
+    || (!isDefaultStorageUrl(project?.cover_photo_url) ? project?.cover_photo_url : null);
+
   // State Management
   const [willBeThere, setWillBeThere] = useState<"yes" | "no" | null>("yes");
   const [rsvpName, setRsvpName] = useState(guestName !== "Guest Name" ? guestName : "");
@@ -97,6 +100,14 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   const [rsvpNotes, setRsvpNotes] = useState<string>("");
   const [rsvpSubmitting, setRsvpSubmitting] = useState(false);
   const [rsvpSuccess, setRsvpSuccess] = useState(false);
+  const [isOpened, setIsOpened] = useState(false);
+
+  const handleOpenInvitation = () => {
+    setIsOpened(true);
+    if (audioRef.current && !isPlaying) {
+      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
+    }
+  };
 
   // Wishes State
   const [wishesList, setWishesList] = useState<DbWish[]>(initialWishes || [
@@ -227,7 +238,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   };
 
   return (
-    <div className="relative w-full md:w-[42%] lg:w-[38%] min-h-[100dvh] md:h-[100dvh] md:overflow-y-auto md:overflow-x-hidden bg-[#faf9f6] text-neutral-900 selection:bg-red-500 selection:text-white border-l border-neutral-200 shadow-2xl flex-shrink-0">
+    <div className={`relative w-full md:w-[42%] lg:w-[38%] min-h-[100dvh] md:h-[100dvh] ${isOpened ? "md:overflow-y-auto md:overflow-x-hidden" : "overflow-hidden"} bg-[#faf9f6] text-neutral-900 selection:bg-red-500 selection:text-white border-l border-neutral-200 shadow-2xl flex-shrink-0`}>
       {/* Audio Element */}
       <audio ref={audioRef} src={project?.music_url || "/audio/bgm.mp3"} loop preload="auto" />
 
@@ -299,6 +310,124 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         )}
       </AnimatePresence>
 
+            {/* ========================================================================= */}
+      {/* 0. COVER DEPAN (SAMPUL UNDANGAN) */}
+      {/* ========================================================================= */}
+      <AnimatePresence>
+        {!isOpened && (
+          <motion.section
+            id="cover-section"
+            initial={{ opacity: 1, y: 0 }}
+            exit={{ y: "-100%", opacity: 0 }}
+            transition={{ duration: 0.85, ease: [0.65, 0, 0.35, 1] }}
+            className="fixed md:absolute inset-0 z-50 h-[100dvh] max-h-[100dvh] w-full flex flex-col justify-between items-center text-center px-6 py-8 overflow-y-auto overflow-x-hidden select-none bg-[#faf9f6]"
+          >
+            {/* Ambient Floating Hearts & Doodles in Cover */}
+            <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-35">
+              {[0, 1, 2, 3, 4, 5].map((i) => (
+                <motion.div
+                  key={i}
+                  initial={{ y: "105vh", opacity: 0.3 }}
+                  animate={{
+                    y: "-10vh",
+                    opacity: [0.2, 0.7, 0.2],
+                    scale: [0.9, 1.15, 0.9],
+                    rotate: [0, 180, 360],
+                  }}
+                  transition={{
+                    duration: 16 + i * 2.5,
+                    repeat: Infinity,
+                    ease: "linear",
+                    delay: i * 2,
+                  }}
+                  style={{ left: (10 + i * 16) + "%" }}
+                  className="absolute text-red-500/50 text-xl font-bold select-none"
+                >
+                  {i % 2 === 0 ? "♥" : "✦"}
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Top Rings + "THE WEDDING OF" */}
+            <div className="relative z-10 pt-2 space-y-2">
+              <div className="flex justify-center">
+                <motion.img
+                  animate={{ rotate: [-2, 2, -2], scale: [1, 1.05, 1] }}
+                  transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                  src={ASSETS.topRings}
+                  alt="Wedding Rings"
+                  className="w-12 h-auto object-contain select-none pointer-events-none drop-shadow-sm"
+                />
+              </div>
+              <p className="font-gaegu font-bold text-xs sm:text-sm tracking-[0.3em] uppercase text-neutral-600">
+                THE WEDDING OF
+              </p>
+              <h1 className="font-gaegu font-bold text-4xl sm:text-5xl text-neutral-900 leading-tight tracking-wide drop-shadow-sm">
+                {brideNickname} <br />
+                <span className="text-red-600 font-gaegu text-3xl sm:text-4xl">&amp;</span> <br />
+                {groomNickname}
+              </h1>
+            </div>
+
+            {/* Center: Couple Illustration or Custom Cover Photo */}
+            <div className="relative z-10 my-auto py-3 flex flex-col items-center justify-center">
+              {coverPhoto ? (
+                <div className="relative w-52 sm:w-60 aspect-[4/5] rounded-3xl overflow-hidden border-4 border-neutral-900 shadow-xl bg-white p-2">
+                  <img src={coverPhoto} alt="Cover Photo" className="w-full h-full object-cover rounded-2xl" />
+                </div>
+              ) : (
+                <motion.div
+                  animate={{ y: [0, -6, 0] }}
+                  transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
+                  className="flex justify-center"
+                >
+                  <img
+                    src={ASSETS.couple}
+                    alt="Illustrated Couple"
+                    className="w-56 sm:w-64 h-auto object-contain select-none pointer-events-none drop-shadow-md"
+                  />
+                </motion.div>
+              )}
+
+              <div className="mt-3 inline-block px-4 py-1 rounded-full border border-neutral-300 bg-white/85 shadow-xs">
+                <p className="font-gaegu font-bold text-sm tracking-widest text-neutral-800">
+                  {formattedDate}
+                </p>
+              </div>
+            </div>
+
+            {/* Bottom: Guest Greeting & "Buka Undangan" Button */}
+            <div className="relative z-10 w-full max-w-xs space-y-3 pb-2">
+              <div className="space-y-1">
+                <p className="font-gaegu font-bold text-xs text-neutral-500">
+                  Kepada Yth. Bapak/Ibu/Saudara/i:
+                </p>
+                <div className="bg-white border-2 border-neutral-900 rounded-full px-5 py-2 shadow-sm inline-block max-w-full">
+                  <p className="font-gaegu font-bold text-base sm:text-lg text-neutral-900 truncate">
+                    {guestName}
+                  </p>
+                </div>
+                <p className="font-gaegu font-light text-[10px] text-neutral-400 italic pt-0.5">
+                  *Mohon maaf jika ada kesalahan penulisan nama/gelar
+                </p>
+              </div>
+
+              {/* Buka Undangan Button */}
+              <motion.button
+                type="button"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleOpenInvitation}
+                className="w-full py-3.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-2 shadow-xl border-2 border-neutral-900 transition-all cursor-pointer font-gaegu font-bold text-base tracking-wider uppercase group"
+              >
+                <span className="text-lg group-hover:scale-110 transition-transform">💌</span>
+                <span>Buka Undangan</span>
+              </motion.button>
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
+
       {/* Main Column */}
       <div className="relative max-w-md mx-auto px-5 py-8 space-y-12 sm:space-y-14 z-10">
         
@@ -328,10 +457,10 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.8 }}
-            className="font-melody text-4xl sm:text-5xl text-neutral-900 leading-tight tracking-wide drop-shadow-sm"
+            className="font-gaegu font-bold text-4xl sm:text-5xl text-neutral-900 leading-tight tracking-wide drop-shadow-sm"
           >
             {brideNickname} <br />
-            <span className="text-red-600 font-melody text-3xl sm:text-4xl inline-block animate-pulse">&amp;</span> <br />
+            <span className="text-red-600 font-gaegu font-bold text-3xl sm:text-4xl inline-block animate-pulse">&amp;</span> <br />
             {groomNickname}
           </motion.h1>
 
@@ -481,7 +610,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                           <h4 className="font-gaegu font-bold text-base text-neutral-900 leading-tight">
                             {item.title}
                           </h4>
-                          <p className="font-gaegu text-xs text-neutral-600 leading-relaxed mt-0.5">
+                          <p className="font-gaegu font-light text-xs text-neutral-600 leading-relaxed mt-0.5">
                             {item.story}
                           </p>
                         </div>
@@ -517,7 +646,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                           <h4 className="font-gaegu font-bold text-base text-neutral-900 leading-tight">
                             {item.title}
                           </h4>
-                          <p className="font-gaegu text-xs text-neutral-600 leading-relaxed mt-0.5">
+                          <p className="font-gaegu font-light text-xs text-neutral-600 leading-relaxed mt-0.5">
                             {item.story}
                           </p>
                         </div>
@@ -590,7 +719,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         {/* 5. WEDDING GIFT SECTION */}
         <section className="text-center space-y-4 pt-4">
           <div className="flex justify-center mb-2">
-            <h3 className="font-melody text-5xl sm:text-6xl text-neutral-900 leading-tight">
+            <h3 className="font-gaegu font-bold text-5xl sm:text-6xl text-neutral-900 leading-tight">
               Wedding <br /> Gift
             </h3>
           </div>
@@ -605,7 +734,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
               {/* Red Badge Name */}
               <div className="border border-red-500 rounded-full px-4 py-0.5 mb-2 bg-transparent">
-                <span className="font-melody text-xl sm:text-2xl text-red-500 block leading-tight">
+                <span className="font-gaegu font-bold text-xl sm:text-2xl text-red-500 block leading-tight">
                   {brideBank.nickname || brideNickname}
                 </span>
               </div>
@@ -626,7 +755,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
               {/* Red Badge Name */}
               <div className="border border-red-500 rounded-full px-4 py-0.5 mb-2 bg-transparent">
-                <span className="font-melody text-xl sm:text-2xl text-red-500 block leading-tight">
+                <span className="font-gaegu font-bold text-xl sm:text-2xl text-red-500 block leading-tight">
                   {groomBank.nickname || groomNickname}
                 </span>
               </div>
@@ -988,7 +1117,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                       {"Hadir"}
                     </span>
                   </div>
-                  <p className="font-gaegu text-xs text-neutral-700 leading-relaxed">
+                  <p className="font-gaegu font-light text-xs text-neutral-700 leading-relaxed">
                     {w.message}
                   </p>
                 </motion.div>
@@ -999,7 +1128,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
         {/* 9. FOOTER */}
         <footer className="text-center space-y-3 pt-10 pb-6 border-t border-neutral-200/60">
-          <p className="font-melody text-2xl text-neutral-900">
+          <p className="font-gaegu font-bold text-2xl text-neutral-900">
             {brideNickname} &amp; {groomNickname}
           </p>
           <p className="font-gaegu text-xs text-neutral-500 tracking-wider">

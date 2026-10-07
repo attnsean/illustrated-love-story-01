@@ -1,5 +1,32 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Gaegu:wght@300;400;700&display=swap");
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Gaegu";
+  src: url("/assets/template/font/Gaegu-Light.ttf") format("truetype"),
+       url("https://www.serastory.com/storage/undangan/templates/illustrated-love-story-01/font/Gaegu-Light.ttf") format("truetype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gaegu";
+  src: url("/assets/template/font/Gaegu-Regular.ttf") format("truetype"),
+       url("https://www.serastory.com/storage/undangan/templates/illustrated-love-story-01/font/Gaegu-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gaegu";
+  src: url("/assets/template/font/Gaegu-Bold.ttf") format("truetype"),
+       url("https://www.serastory.com/storage/undangan/templates/illustrated-love-story-01/font/Gaegu-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
 
 @font-face {
   font-family: "Lovely Melody";
@@ -46,6 +73,21 @@
 
 .font-gaegu {
   font-family: "Gaegu", cursive, sans-serif;
+}
+
+.font-gaegu-light {
+  font-family: "Gaegu", cursive, sans-serif !important;
+  font-weight: 300 !important;
+}
+
+.font-gaegu-regular {
+  font-family: "Gaegu", cursive, sans-serif !important;
+  font-weight: 400 !important;
+}
+
+.font-gaegu-bold {
+  font-family: "Gaegu", cursive, sans-serif !important;
+  font-weight: 700 !important;
 }
 
 .font-signature {

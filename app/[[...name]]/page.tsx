@@ -106,7 +106,7 @@ export default async function Home({ params }: Props) {
     return (
       <main className="min-h-[100dvh] w-full flex items-center justify-center bg-neutral-950 px-4">
         <div className="max-w-md w-full text-center space-y-6 p-8 rounded-3xl bg-neutral-900 border border-neutral-800 text-white">
-          <h2 className="text-2xl font-melody text-neutral-200">Undangan Nonaktif</h2>
+          <h2 className="text-2xl font-gaegu font-bold text-neutral-200">Undangan Nonaktif</h2>
           <p className="text-sm font-gaegu text-neutral-400">
             Masa aktif undangan pernikahan digital ini telah selesai.
           </p>
@@ -178,9 +178,9 @@ export default async function Home({ params }: Props) {
             <img src={ASSETS.topRings} alt="Rings" className="w-10 h-auto object-contain" />
           </div>
 
-          <h1 className="font-melody text-4xl lg:text-5xl text-neutral-900 leading-tight mb-2">
+          <h1 className="font-gaegu font-bold text-4xl lg:text-5xl text-neutral-900 leading-tight mb-2">
             {brideNickname} <br />
-            <span className="text-red-600 font-melody text-3xl lg:text-4xl">&amp;</span> <br />
+            <span className="text-red-600 font-gaegu font-bold text-3xl lg:text-4xl">&amp;</span> <br />
             {groomNickname}
           </h1>
 
