@@ -1,10 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-key';
-
-const supabaseAdmin = createClient(supabaseUrl, supabaseServiceRoleKey);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ujiqdozsipxwjrugtsgd.supabase.co';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_jfhrpcWLhECHJEnE1AhiaQ_zgDT7D4R';
+const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request: Request) {
   try {
