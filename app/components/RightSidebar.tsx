@@ -186,24 +186,29 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
     }
   };
 
-  // RSVP Form Submit
+    // RSVP Form Submit
   const handleRsvpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!rsvpName.trim()) return;
     setRsvpSubmitting(true);
 
     try {
+      const activeProjectId = project?.id || "1bf6f05c-f64a-40c9-b67a-490b52289bd4";
       const res = await fetch("/api/rsvp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          project_id: project?.id || "",
+          project_id: activeProjectId,
           guest_id: guest?.id,
           name: rsvpName,
+          guest_name: rsvpName,
           email: rsvpEmail,
-          
+          status: rsvpStatus,
+          attendance: rsvpStatus === "attending" ? "attending" : "not_attending",
+          pax: guestCount,
           guests_count: guestCount,
           notes: rsvpNotes,
+          message: rsvpNotes,
         }),
       });
 
@@ -224,22 +229,22 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
     setWishSubmitting(true);
 
     try {
+      const activeProjectId = project?.id || "1bf6f05c-f64a-40c9-b67a-490b52289bd4";
       const res = await fetch("/api/wishes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          project_id: project?.id || "",
+          project_id: activeProjectId,
           guest_id: guest?.id,
           name: wishName,
           message: wishMessage,
-          
         }),
       });
 
       if (res.ok) {
         const newWish: DbWish = {
           id: Date.now().toString(),
-          project_id: project?.id || "",
+          project_id: activeProjectId,
           name: wishName,
           message: wishMessage,
           is_approved: true,
@@ -513,10 +518,10 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
         {/* 2. DATE & PLACE SECTION */}
         <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.2, margin: "-40px" }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, y: 40, scale: 0.96 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: false, amount: 0.15, margin: "-30px" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="text-center space-y-5 pt-2"
         >
           <p className="text-xs sm:text-sm font-gaegu tracking-[0.2em] text-neutral-800 uppercase font-bold">
@@ -592,10 +597,10 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
         {/* 3. OUR STORY SECTION */}
         <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.2, margin: "-40px" }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, y: 40, scale: 0.96 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: false, amount: 0.15, margin: "-30px" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="text-center space-y-4 pt-4"
         >
           <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-4 leading-snug">
@@ -695,10 +700,10 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
         {/* 4. DRESS CODE SECTION */}
         <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.2, margin: "-40px" }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, y: 40, scale: 0.96 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: false, amount: 0.15, margin: "-30px" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="text-center space-y-4 pt-4"
         >
           <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-6 leading-relaxed">
@@ -751,7 +756,12 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         </motion.section>
 
         {/* 5. WEDDING GIFT SECTION */}
-        <section className="text-center space-y-4 pt-4">
+        <motion.section 
+          initial={{ opacity: 0, y: 40, scale: 0.96 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: false, amount: 0.15, margin: "-30px" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center space-y-4 pt-4">
           <div className="flex justify-center mb-2">
             <h3 className="font-gaegu font-bold text-5xl sm:text-6xl text-neutral-900 leading-tight">
               Wedding <br /> Gift
@@ -760,7 +770,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
           <div className="grid grid-cols-2 gap-3 pt-3">
             {/* Bride Tag Card */}
-            <div className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-4 sm:p-5 shadow-sm">
+            <motion.div whileHover={{ y: -5, scale: 1.02 }} transition={{ duration: 0.25 }} className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-4 sm:p-5 shadow-sm">
               {/* Heart Loop Top */}
               <div className="w-7 h-7 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-7 bg-white mb-2 shadow-xs">
                 <span className="text-xs text-red-500">♥</span>
@@ -777,11 +787,11 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               <span className="font-gaegu font-bold text-2xl sm:text-3xl text-neutral-900 tracking-widest my-0.5 select-all">{brideBank.account_number || "777555231"}</span>
               <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {brideBank.owner_name || brideFull}</span>
 
-              <button type="button" onClick={() => copyToClipboard(brideBank.account_number || "777555231", "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></button>
-            </div>
+              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => copyToClipboard(brideBank.account_number || "777555231", "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></motion.button>
+            </motion.div>
 
             {/* Groom Tag Card */}
-            <div className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-4 sm:p-5 shadow-sm">
+            <motion.div whileHover={{ y: -5, scale: 1.02 }} transition={{ duration: 0.25 }} className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-4 sm:p-5 shadow-sm">
               {/* Heart Loop Top */}
               <div className="w-7 h-7 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-7 bg-white mb-2 shadow-xs">
                 <span className="text-xs text-red-500">♥</span>
@@ -798,16 +808,21 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               <span className="font-gaegu font-bold text-2xl sm:text-3xl text-neutral-900 tracking-widest my-0.5 select-all">{groomBank.account_number || "777555005"}</span>
               <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {groomBank.owner_name || groomFull}</span>
 
-              <button type="button" onClick={() => copyToClipboard(groomBank.account_number || "777555005", "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></button>
-            </div>
+              <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => copyToClipboard(groomBank.account_number || "777555005", "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></motion.button>
+            </motion.div>
           </div>
 
           {/* Red Note Box */}
           <div className="mt-5 p-4 rounded-2xl border border-red-200 bg-red-50/50 text-center font-gaegu text-red-600 space-y-1"><p className="text-base sm:text-lg font-bold">#Note:</p><p className="text-xs sm:text-sm font-bold leading-snug">- Pastikan Nama Bank dan Pemilik Rekening sudah sesuai dengan nama pasangan</p><p className="text-xs sm:text-sm font-bold leading-snug">- Konfirmasi pengiriman kado/tanda kasih melalui pesan pribadi kepada mempelai</p></div>
-        </section>
+        </motion.section>
 
-        {/* 6. RSVP SECTION (ARCH ILLUSTRATION 01-25.png) */}
-        <section className="text-center space-y-4 pt-4">
+        {/* 6. RSVP SECTION (ARCH ILLUSTRATION) */}
+        <motion.section 
+          initial={{ opacity: 0, y: 40, scale: 0.96 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: false, amount: 0.15, margin: "-30px" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center space-y-4 pt-4">
           <p className="text-xs sm:text-sm font-gaegu tracking-[0.2em] text-neutral-800 uppercase font-bold">
             kindly let us know if you can join us
           </p>
@@ -903,14 +918,14 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               </AnimatePresence>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* 7. ATTENDANCE FORM SECTION */}
         <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.2, margin: "-40px" }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, y: 40, scale: 0.96 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: false, amount: 0.15, margin: "-30px" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="text-center space-y-4 pt-4"
         >
           <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-4">
@@ -1043,10 +1058,10 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
         {/* 8. BLESSINGS & WISHES SECTION */}
         <motion.section 
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: false, amount: 0.2, margin: "-40px" }}
-          transition={{ duration: 0.6 }}
+          initial={{ opacity: 0, y: 40, scale: 0.96 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: false, amount: 0.15, margin: "-30px" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="text-center space-y-4 pt-4"
         >
           <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-4">
@@ -1161,7 +1176,12 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         </motion.section>
 
         {/* 9. FOOTER */}
-        <footer className="text-center space-y-3 pt-10 pb-6 border-t border-neutral-200/60">
+        <motion.footer 
+          initial={{ opacity: 0, y: 25 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false, amount: 0.2, margin: "-20px" }}
+          transition={{ duration: 0.6 }}
+          className="text-center space-y-3 pt-10 pb-6 border-t border-neutral-200/60">
           <p className="font-gaegu font-bold text-2xl text-neutral-900">
             {brideNickname} &amp; {groomNickname}
           </p>
@@ -1178,7 +1198,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               <span>Crafted with ♥ by SERA STORY</span>
             </a>
           </div>
-        </footer>
+        </motion.footer>
 
       </div>
     </div>
