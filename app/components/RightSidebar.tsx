@@ -102,6 +102,20 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   const [rsvpSuccess, setRsvpSuccess] = useState(false);
   const [isOpened, setIsOpened] = useState(false);
 
+  useEffect(() => {
+    if (!isOpened) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, [isOpened]);
+
   const handleOpenInvitation = () => {
     setIsOpened(true);
     if (audioRef.current && !isPlaying) {
@@ -238,7 +252,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   };
 
   return (
-    <div className={`relative w-full md:w-[42%] lg:w-[38%] min-h-[100dvh] md:h-[100dvh] ${isOpened ? "md:overflow-y-auto md:overflow-x-hidden" : "overflow-hidden"} bg-[#faf9f6] text-neutral-900 selection:bg-red-500 selection:text-white border-l border-neutral-200 shadow-2xl flex-shrink-0`}>
+    <div className={`relative w-full md:w-[42%] lg:w-[38%] ${isOpened ? "min-h-[100dvh] md:h-[100dvh] md:overflow-y-auto md:overflow-x-hidden" : "h-[100dvh] max-h-[100dvh] overflow-hidden"} bg-[#faf9f6] text-neutral-900 selection:bg-red-500 selection:text-white border-l border-neutral-200 shadow-2xl flex-shrink-0`}>
       {/* Audio Element */}
       <audio ref={audioRef} src={project?.music_url || "/audio/bgm.mp3"} loop preload="auto" />
 
@@ -297,30 +311,13 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
       {/* Toast Notification */}
       <AnimatePresence>
-        {copiedText && (
-          <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-neutral-900 text-white px-5 py-2.5 rounded-full font-gaegu text-sm font-bold shadow-xl border border-neutral-700 flex items-center gap-2"
-          >
-            <span className="text-emerald-400 font-bold">✓</span>
-            <span>{copiedText} berhasil disalin!</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-            {/* ========================================================================= */}
-      {/* 0. COVER DEPAN (SAMPUL UNDANGAN) */}
-      {/* ========================================================================= */}
-      <AnimatePresence>
         {!isOpened && (
           <motion.section
             id="cover-section"
             initial={{ opacity: 1, y: 0 }}
             exit={{ y: "-100%", opacity: 0 }}
             transition={{ duration: 0.85, ease: [0.65, 0, 0.35, 1] }}
-            className="fixed md:absolute inset-0 z-50 h-[100dvh] max-h-[100dvh] w-full flex flex-col justify-between items-center text-center px-6 py-8 overflow-y-auto overflow-x-hidden select-none bg-[#faf9f6]"
+            className="fixed md:absolute inset-0 z-50 h-[100dvh] max-h-[100dvh] w-full flex flex-col justify-between items-center text-center px-4 sm:px-6 py-3 sm:py-5 overflow-hidden select-none bg-[#faf9f6]"
           >
             {/* Ambient Floating Hearts & Doodles in Cover */}
             <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden opacity-35">
@@ -349,65 +346,63 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             </div>
 
             {/* Top Rings + "THE WEDDING OF" */}
-            <div className="relative z-10 pt-2 space-y-2">
+            <div className="relative z-10 pt-1 space-y-1 shrink-0">
               <div className="flex justify-center">
                 <motion.img
                   animate={{ rotate: [-2, 2, -2], scale: [1, 1.05, 1] }}
                   transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
                   src={ASSETS.topRings}
                   alt="Wedding Rings"
-                  className="w-12 h-auto object-contain select-none pointer-events-none drop-shadow-sm"
+                  className="w-10 sm:w-12 h-auto object-contain select-none pointer-events-none drop-shadow-sm"
                 />
               </div>
-              <p className="font-gaegu font-bold text-xs sm:text-sm tracking-[0.3em] uppercase text-neutral-600">
+              <p className="font-gaegu font-bold text-[11px] sm:text-xs tracking-[0.3em] uppercase text-neutral-600">
                 THE WEDDING OF
               </p>
-              <h1 className="font-gaegu font-bold text-4xl sm:text-5xl text-neutral-900 leading-tight tracking-wide drop-shadow-sm">
-                {brideNickname} <br />
-                <span className="text-red-600 font-gaegu text-3xl sm:text-4xl">&amp;</span> <br />
-                {groomNickname}
+              <h1 className="font-gaegu font-bold text-3xl sm:text-4xl lg:text-4xl text-neutral-900 leading-tight tracking-wide drop-shadow-sm">
+                {brideNickname} <span className="text-red-600 font-gaegu text-2xl sm:text-3xl">&amp;</span> {groomNickname}
               </h1>
             </div>
 
             {/* Center: Couple Illustration or Custom Cover Photo */}
-            <div className="relative z-10 my-auto py-3 flex flex-col items-center justify-center">
+            <div className="relative z-10 my-auto flex-1 min-h-0 flex flex-col items-center justify-center py-1 w-full max-w-xs">
               {coverPhoto ? (
-                <div className="relative w-52 sm:w-60 aspect-[4/5] rounded-3xl overflow-hidden border-4 border-neutral-900 shadow-xl bg-white p-2">
-                  <img src={coverPhoto} alt="Cover Photo" className="w-full h-full object-cover rounded-2xl" />
+                <div className="relative max-h-[30vh] aspect-[4/5] rounded-2xl overflow-hidden border-3 border-neutral-900 shadow-xl bg-white p-1.5">
+                  <img src={coverPhoto} alt="Cover Photo" className="w-full h-full object-cover rounded-xl" />
                 </div>
               ) : (
                 <motion.div
-                  animate={{ y: [0, -6, 0] }}
+                  animate={{ y: [0, -4, 0] }}
                   transition={{ repeat: Infinity, duration: 3.5, ease: "easeInOut" }}
-                  className="flex justify-center"
+                  className="flex justify-center items-center flex-1 min-h-0 max-h-[32vh]"
                 >
                   <img
                     src={ASSETS.couple}
                     alt="Illustrated Couple"
-                    className="w-56 sm:w-64 h-auto object-contain select-none pointer-events-none drop-shadow-md"
+                    className="max-h-[30vh] max-w-[85%] w-auto h-auto object-contain select-none pointer-events-none drop-shadow-md"
                   />
                 </motion.div>
               )}
 
-              <div className="mt-3 inline-block px-4 py-1 rounded-full border border-neutral-300 bg-white/85 shadow-xs">
-                <p className="font-gaegu font-bold text-sm tracking-widest text-neutral-800">
+              <div className="mt-2 inline-block px-3.5 py-0.5 rounded-full border border-neutral-300 bg-white/85 shadow-xs shrink-0">
+                <p className="font-gaegu font-bold text-xs sm:text-sm tracking-widest text-neutral-800">
                   {formattedDate}
                 </p>
               </div>
             </div>
 
             {/* Bottom: Guest Greeting & "Buka Undangan" Button */}
-            <div className="relative z-10 w-full max-w-xs space-y-3 pb-2">
-              <div className="space-y-1">
-                <p className="font-gaegu font-bold text-xs text-neutral-500">
+            <div className="relative z-10 w-full max-w-xs space-y-2 pb-1 shrink-0">
+              <div className="space-y-0.5">
+                <p className="font-gaegu font-bold text-[11px] sm:text-xs text-neutral-500">
                   Kepada Yth. Bapak/Ibu/Saudara/i:
                 </p>
-                <div className="bg-white border-2 border-neutral-900 rounded-full px-5 py-2 shadow-sm inline-block max-w-full">
-                  <p className="font-gaegu font-bold text-base sm:text-lg text-neutral-900 truncate">
+                <div className="bg-white border-2 border-neutral-900 rounded-full px-4 py-1 shadow-sm inline-block max-w-full">
+                  <p className="font-gaegu font-bold text-sm sm:text-base text-neutral-900 truncate">
                     {guestName}
                   </p>
                 </div>
-                <p className="font-gaegu font-light text-[10px] text-neutral-400 italic pt-0.5">
+                <p className="font-gaegu font-light text-[9px] sm:text-[10px] text-neutral-400 italic">
                   *Mohon maaf jika ada kesalahan penulisan nama/gelar
                 </p>
               </div>
@@ -415,12 +410,12 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               {/* Buka Undangan Button */}
               <motion.button
                 type="button"
-                whileHover={{ scale: 1.04 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.96 }}
                 onClick={handleOpenInvitation}
-                className="w-full py-3.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-2 shadow-xl border-2 border-neutral-900 transition-all cursor-pointer font-gaegu font-bold text-base tracking-wider uppercase group"
+                className="w-full py-2.5 sm:py-3 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-2 shadow-lg border-2 border-neutral-900 transition-all cursor-pointer font-gaegu font-bold text-sm sm:text-base tracking-wider uppercase group"
               >
-                <span className="text-lg group-hover:scale-110 transition-transform">💌</span>
+                <span className="text-base group-hover:scale-110 transition-transform">💌</span>
                 <span>Buka Undangan</span>
               </motion.button>
             </div>
