@@ -407,17 +407,50 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                 </p>
               </div>
 
-              {/* Buka Undangan Button */}
-              <motion.button
-                type="button"
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.96 }}
-                onClick={handleOpenInvitation}
-                className="w-full py-2.5 sm:py-3 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-2 shadow-lg border-2 border-neutral-900 transition-all cursor-pointer font-gaegu font-bold text-sm sm:text-base tracking-wider uppercase group"
-              >
-                <span className="text-base group-hover:scale-110 transition-transform">💌</span>
-                <span>Buka Undangan</span>
-              </motion.button>
+              {/* Buka Undangan Button - Simple Aesthetic */}
+              <div className="pt-1 flex justify-center">
+                <motion.button
+                  type="button"
+                  whileHover={{ scale: 1.04, y: -1 }}
+                  whileTap={{ scale: 0.96 }}
+                  onClick={handleOpenInvitation}
+                  className="relative group px-6 py-2.5 sm:py-3 rounded-full bg-[#1e1b18] hover:bg-neutral-900 text-white shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2.5 border border-[#38332d] cursor-pointer overflow-hidden max-w-[240px] w-full"
+                >
+                  {/* Subtle shimmer sweep on hover */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
+
+                  {/* Delicate Minimalist Mail Icon */}
+                  <svg 
+                    className="w-4 h-4 text-red-400 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300 shrink-0" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  >
+                    <rect width="20" height="16" x="2" y="4" rx="3" />
+                    <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                  </svg>
+
+                  <span className="font-gaegu font-bold text-base sm:text-lg tracking-wider text-neutral-100 group-hover:text-white transition-colors">
+                    Buka Undangan
+                  </span>
+
+                  {/* Sleek Arrow Indicator */}
+                  <svg 
+                    className="w-3.5 h-3.5 text-neutral-400 group-hover:translate-x-1 group-hover:text-white transition-all shrink-0" 
+                    viewBox="0 0 24 24" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    strokeWidth="2.5" 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round"
+                  >
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </motion.button>
+              </div>
             </div>
           </motion.section>
         )}
