@@ -95,6 +95,8 @@ export interface DbProject {
   health_protocol?: string | null;
   hashtag?: string | null;
   countdown_target?: string | null;
+  has_dresscode?: boolean | null;
+  dresscode_colors?: unknown;
   wizard_step: number;
   wizard_completed: boolean;
   subscriptions?: {

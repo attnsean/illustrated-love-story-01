@@ -148,6 +148,51 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
   // State Management
   const isGuestLocked = Boolean(guestName && guestName !== "Guest Name" && guestName.trim() !== "");
+    // Dress Code
+  const hasDresscode = (project as any)?.has_dresscode !== false;
+  
+  const parseDresscodeColors = (): { hex: string; name: string }[] => {
+    const rawColors = (project as any)?.dresscode_colors;
+    if (Array.isArray(rawColors) && rawColors.length > 0) {
+      return rawColors.map((c: any) => ({
+        hex: typeof c === "string" ? c : (c?.hex || c?.color || "#ffffff"),
+        name: typeof c === "string" ? c : (c?.name || c?.label || "")
+      }));
+    }
+    if (typeof rawColors === "string" && rawColors.trim().startsWith("[")) {
+      try {
+        const parsed = JSON.parse(rawColors);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((c: any) => ({
+            hex: typeof c === "string" ? c : (c?.hex || c?.color || "#ffffff"),
+            name: typeof c === "string" ? c : (c?.name || c?.label || "")
+          }));
+        }
+      } catch {}
+    }
+    const eventDc = mainEvent?.dresscode || (project as any)?.dresscode;
+    if (eventDc && typeof eventDc === "string" && eventDc.trim().startsWith("{")) {
+      try {
+        const parsed = JSON.parse(eventDc);
+        if (Array.isArray(parsed.colors) && parsed.colors.length > 0) {
+          return parsed.colors.map((c: any) => ({
+            hex: typeof c === "string" ? c : (c?.hex || "#ffffff"),
+            name: typeof c === "string" ? c : (c?.name || "")
+          }));
+        }
+      } catch {}
+    }
+    return [
+      { name: "Cream White", hex: "#FAF7F2" },
+      { name: "Warm Sand", hex: "#E6D7C3" },
+      { name: "Soft Terracotta", hex: "#C98A7D" },
+      { name: "Sage Green", hex: "#9EA992" },
+      { name: "Midnight Black", hex: "#2A2B2A" },
+    ];
+  };
+
+  const dresscodeColors = parseDresscodeColors();
+
   const [willBeThere, setWillBeThere] = useState<"yes" | "no" | null>(
     existingRsvp ? (existingRsvp.attendance === "not_attending" ? "no" : "yes") : "yes"
   );
@@ -804,61 +849,60 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         </motion.section>
 
         {/* 4. DRESS CODE SECTION */}
-        <motion.section 
-          initial={{ opacity: 0, y: 40, scale: 0.96 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: false, amount: 0.15, margin: "-30px" }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="text-center space-y-4 pt-4"
-        >
-          <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-6 leading-relaxed">
-            To maintain the harmony of our wedding theme, we kindly request our guests to wear
-          </p>
-
-          <div className="flex justify-center">
-            <motion.img 
-              whileHover={{ scale: 1.05 }}
-              src={ASSETS.titleDressCode} 
-              alt="Dress Code" 
-              className="w-36 h-auto object-contain select-none pointer-events-none" 
-            />
-          </div>
-
-          <div className="flex justify-center pt-2">
-            <motion.img 
-              whileHover={{ scale: 1.04 }}
-              src={ASSETS.dressCodeAttire} 
-              alt="Formal Attire" 
-              className="w-44 h-auto object-contain select-none pointer-events-none drop-shadow-sm" 
-            />
-          </div>
-
-          <div className="pt-3">
-            <p className="text-xs font-gaegu font-bold tracking-[0.2em] text-neutral-600 uppercase mb-3">
-              COLOR PALETTE
+        {hasDresscode && (
+          <motion.section 
+            initial={{ opacity: 0, y: 40, scale: 0.96 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: false, amount: 0.15, margin: "-30px" }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="text-center space-y-4 pt-4"
+          >
+            <p className="text-xs sm:text-sm font-gaegu tracking-wider text-neutral-800 font-bold px-6 leading-relaxed">
+              To maintain the harmony of our wedding theme, we kindly request our guests to wear
             </p>
-            <div className="flex items-center justify-center gap-3">
-              {[
-                { name: "Cream White", bg: "bg-[#FAF7F2]", border: "border-neutral-300" },
-                { name: "Warm Sand", bg: "bg-[#E6D7C3]", border: "border-neutral-300" },
-                { name: "Soft Terracotta", bg: "bg-[#C98A7D]", border: "border-neutral-400" },
-                { name: "Sage Green", bg: "bg-[#9EA992]", border: "border-neutral-400" },
-                { name: "Midnight Black", bg: "bg-[#2A2B2A]", border: "border-neutral-900" },
-              ].map((c, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ scale: 0, opacity: 0 }}
-                  whileInView={{ scale: 1, opacity: 1 }}
-                  viewport={{ once: false, amount: 0.2 }}
-                  transition={{ delay: i * 0.1, type: "spring", stiffness: 300 }}
-                  whileHover={{ scale: 1.25, y: -4 }}
-                  className={`w-9 h-9 rounded-full ${c.bg} ${c.border} border-2 shadow-sm cursor-pointer`}
-                  title={c.name}
-                />
-              ))}
+
+            <div className="flex justify-center">
+              <motion.img 
+                whileHover={{ scale: 1.05 }}
+                src={ASSETS.titleDressCode} 
+                alt="Dress Code" 
+                className="w-36 h-auto object-contain select-none pointer-events-none" 
+              />
             </div>
-          </div>
-        </motion.section>
+
+            <div className="flex justify-center pt-2">
+              <motion.img 
+                whileHover={{ scale: 1.04 }}
+                src={ASSETS.dressCodeAttire} 
+                alt="Formal Attire" 
+                className="w-44 h-auto object-contain select-none pointer-events-none drop-shadow-sm" 
+              />
+            </div>
+
+            {dresscodeColors.length > 0 && (
+              <div className="pt-3">
+                <p className="text-xs font-gaegu font-bold tracking-[0.2em] text-neutral-600 uppercase mb-3">
+                  COLOR PALETTE
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3 px-4">
+                  {dresscodeColors.map((c, i) => (
+                    <motion.div
+                      key={i}
+                      initial={{ scale: 0, opacity: 0 }}
+                      whileInView={{ scale: 1, opacity: 1 }}
+                      viewport={{ once: false, amount: 0.2 }}
+                      transition={{ delay: i * 0.1, type: "spring", stiffness: 300 }}
+                      whileHover={{ scale: 1.25, y: -4 }}
+                      style={{ backgroundColor: c.hex }}
+                      className="w-9 h-9 rounded-full border border-neutral-300/80 shadow-sm cursor-pointer"
+                      title={c.name || c.hex}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </motion.section>
+        )}
 
         {/* 5. WEDDING GIFT SECTION */}
         <motion.section 
