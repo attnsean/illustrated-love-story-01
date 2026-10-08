@@ -275,6 +275,8 @@ export async function resolveProjectData(slug?: string, host?: string): Promise<
             year: item.year,
             title: item.title,
             desc: item.description,
+            story: item.description,
+            description: item.description,
             order: item.sort_order
           }));
         }

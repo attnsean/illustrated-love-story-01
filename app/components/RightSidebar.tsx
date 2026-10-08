@@ -29,7 +29,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
   // Event Info
   const mainEvent = events && events.length > 0 ? events[0] : null;
-  const weddingDateRaw = mainEvent?.event_date || project?.wedding_date; // YYYY-MM-DD
+  const weddingDateRaw = mainEvent?.event_date || project?.wedding_date || (project?.countdown_target ? project.countdown_target.split('T')[0] : null);
   const formatDateDisplay = (dateStr?: string | null) => {
     if (!dateStr) return "28.02.2028";
     try {
@@ -47,13 +47,28 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
     }
   };
   const formattedDate = formatDateDisplay(weddingDateRaw);
-  const formattedTime = mainEvent?.event_time ? `${mainEvent.event_time.slice(0, 5)} WIB` : "15:00 WIB";
-  const venueName = mainEvent?.venue_name || "Villa Dago";
-  const venueAddress = mainEvent?.venue_address || "Jl. Dago Pakar Permai No. 1, Bandung";
-  const mapsUrl = mainEvent?.venue_maps_url || "https://maps.google.com";
+
+  const extractTime = () => {
+    if (mainEvent?.event_time) {
+      return `${mainEvent.event_time.slice(0, 5)} WIB`;
+    }
+    if ((project as any)?.wedding_time) {
+      return `${(project as any).wedding_time.slice(0, 5)} WIB`;
+    }
+    if (project?.countdown_target && project.countdown_target.includes("T")) {
+      const timePart = project.countdown_target.split("T")[1]?.slice(0, 5);
+      if (timePart) return `${timePart} WIB`;
+    }
+    return "15:00 WIB";
+  };
+  const formattedTime = extractTime();
+
+  const venueName = mainEvent?.venue_name || (project as any)?.venue_name || "Villa Dago";
+  const venueAddress = mainEvent?.venue_address || (project as any)?.venue_address || "Jl. Dago Pakar Permai No. 1, Bandung";
+  const mapsUrl = mainEvent?.venue_maps_url || (project as any)?.venue_maps_url || "https://maps.google.com";
 
   // Story Milestones
-  const dbStories = (project as any)?.wedding_stories || (project as any)?.love_story_items;
+  const dbStories = (project as any)?.love_story_items || (project as any)?.wedding_stories;
   const stories = Array.isArray(dbStories) && dbStories.length > 0
     ? dbStories
     : [
@@ -75,18 +90,50 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
       ];
 
   // Bank Info
-  const brideBank = (project as any)?.bride_bank || {
-    bank_name: "BANK BCA:",
-    account_number: "777555231",
-    owner_name: brideFull,
-    nickname: brideNickname,
+  let paymentAccounts: any[] = [];
+  try {
+    if (Array.isArray((project as any)?.payment_accounts)) {
+      paymentAccounts = (project as any).payment_accounts;
+    } else if (typeof (project as any)?.payment_accounts === "string") {
+      paymentAccounts = JSON.parse((project as any).payment_accounts);
+    }
+  } catch (e) {
+    paymentAccounts = [];
+  }
+
+  const formatBankTitle = (name?: string) => {
+    if (!name) return "BANK BCA";
+    const clean = name.replace(/:/g, "").trim().toUpperCase();
+    return clean.startsWith("BANK") ? clean : `BANK ${clean}`;
   };
-  const groomBank = (project as any)?.groom_bank || {
-    bank_name: "BANK BCA:",
-    account_number: "777555005",
-    owner_name: groomFull,
-    nickname: groomNickname,
-  };
+
+  const brideBank = paymentAccounts[0]
+    ? {
+        bank_name: paymentAccounts[0].provider || paymentAccounts[0].bank_name || "BANK BCA",
+        account_number: paymentAccounts[0].account_number || "777555231",
+        owner_name: paymentAccounts[0].account_name || paymentAccounts[0].owner_name || brideFull,
+        nickname: brideNickname,
+      }
+    : ((project as any)?.bride_bank || {
+        bank_name: "BANK BCA",
+        account_number: "777555231",
+        owner_name: brideFull,
+        nickname: brideNickname,
+      });
+
+  const groomBank = paymentAccounts[1]
+    ? {
+        bank_name: paymentAccounts[1].provider || paymentAccounts[1].bank_name || "BANK BCA",
+        account_number: paymentAccounts[1].account_number || "777555005",
+        owner_name: paymentAccounts[1].account_name || paymentAccounts[1].owner_name || groomFull,
+        nickname: groomNickname,
+      }
+    : ((project as any)?.groom_bank || {
+        bank_name: "BANK BCA",
+        account_number: "777555005",
+        owner_name: groomFull,
+        nickname: groomNickname,
+      });
 
   const coverPhoto = (!isDefaultStorageUrl(project?.opening_photo_url) ? project?.opening_photo_url : null)
     || (!isDefaultStorageUrl(project?.cover_photo_url) ? project?.cover_photo_url : null);
@@ -143,7 +190,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
       id: "2",
       project_id: project?.id || "",
       name: "Rian & Sarah",
-      message: "Selamat menempuh hidup baru Marvel & Natalie! Bahagia selalu hingga kakek nenek.",
+      message: `Selamat menempuh hidup baru ${groomNickname} & ${brideNickname}! Bahagia selalu hingga kakek nenek.`,
       is_approved: true,
       created_at: new Date().toISOString(),
     },
@@ -503,6 +550,29 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             {groomNickname}
           </motion.h1>
 
+          {(brideFull || groomFull) && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.8 }}
+              className="mt-2 space-y-0.5"
+            >
+              <p className="font-gaegu text-lg sm:text-xl font-bold text-neutral-800 tracking-wide">
+                {brideFull} &amp; {groomFull}
+              </p>
+              {Boolean((project as any)?.bride_father || (project as any)?.bride_mother) && (
+                <p className="font-gaegu text-xs sm:text-sm text-neutral-600">
+                  Putri dari {(project as any)?.bride_father ? `Bpk. ${(project as any).bride_father}` : ""}{Boolean((project as any)?.bride_father && (project as any)?.bride_mother) ? " & " : ""}{(project as any)?.bride_mother ? `Ibu ${(project as any).bride_mother}` : ""}
+                </p>
+              )}
+              {Boolean((project as any)?.groom_father || (project as any)?.groom_mother) && (
+                <p className="font-gaegu text-xs sm:text-sm text-neutral-600">
+                  Putra dari {(project as any)?.groom_father ? `Bpk. ${(project as any).groom_father}` : ""}{Boolean((project as any)?.groom_father && (project as any)?.groom_mother) ? " & " : ""}{(project as any)?.groom_mother ? `Ibu ${(project as any).groom_mother}` : ""}
+                </p>
+              )}
+            </motion.div>
+          )}
+
           {/* Couple Illustration with Gentle Floating Bob */}
           <div className="pt-3 flex justify-center">
             <motion.img 
@@ -640,7 +710,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                       {!isEven ? (
                         <motion.span 
                           whileHover={{ scale: 1.08 }}
-                          className="font-gaegu font-bold text-3xl sm:text-4xl text-red-600 block leading-tight cursor-default tracking-wider"
+                          className={`font-gaegu font-bold text-red-600 block leading-tight cursor-default whitespace-nowrap ${(item.year || "").length > 7 ? "text-base sm:text-lg tracking-tight" : (item.year || "").length > 4 ? "text-xl sm:text-2xl tracking-normal" : "text-3xl sm:text-4xl tracking-wider"}`}
                         >
                           {item.year || "2019"}
                         </motion.span>
@@ -650,7 +720,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                             {item.title}
                           </h4>
                           <p className="font-gaegu font-light text-xs text-neutral-600 leading-relaxed mt-0.5">
-                            {item.story}
+                            {item.story || item.desc || item.description}
                           </p>
                         </div>
                       )}
@@ -676,7 +746,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                       {isEven ? (
                         <motion.span 
                           whileHover={{ scale: 1.08 }}
-                          className="font-gaegu font-bold text-3xl sm:text-4xl text-red-600 block leading-tight cursor-default tracking-wider"
+                          className={`font-gaegu font-bold text-red-600 block leading-tight cursor-default whitespace-nowrap ${(item.year || "").length > 7 ? "text-base sm:text-lg tracking-tight" : (item.year || "").length > 4 ? "text-xl sm:text-2xl tracking-normal" : "text-3xl sm:text-4xl tracking-wider"}`}
                         >
                           {item.year || "2020"}
                         </motion.span>
@@ -686,7 +756,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                             {item.title}
                           </h4>
                           <p className="font-gaegu font-light text-xs text-neutral-600 leading-relaxed mt-0.5">
-                            {item.story}
+                            {item.story || item.desc || item.description}
                           </p>
                         </div>
                       )}
@@ -783,7 +853,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                 </span>
               </div>
 
-              <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{brideBank.bank_name || "BANK BCA:"}</span>
+              <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{formatBankTitle(brideBank.bank_name)}</span>
               <span className="font-gaegu font-bold text-2xl sm:text-3xl text-neutral-900 tracking-widest my-0.5 select-all">{brideBank.account_number || "777555231"}</span>
               <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {brideBank.owner_name || brideFull}</span>
 
@@ -804,7 +874,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                 </span>
               </div>
 
-              <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{groomBank.bank_name || "BANK BCA:"}</span>
+              <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{formatBankTitle(groomBank.bank_name)}</span>
               <span className="font-gaegu font-bold text-2xl sm:text-3xl text-neutral-900 tracking-widest my-0.5 select-all">{groomBank.account_number || "777555005"}</span>
               <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {groomBank.owner_name || groomFull}</span>
 

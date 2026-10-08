@@ -10,6 +10,7 @@ export const revalidate = 0;
 
 type Props = {
   params: Promise<{ name?: string[] }>;
+  searchParams?: Promise<{ to?: string; guest?: string; u?: string; n?: string }>;
 };
 
 const formatFallbackGuestName = (raw: string): string => {
@@ -32,8 +33,9 @@ const formatFallbackGuestName = (raw: string): string => {
     .join(" ");
 };
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const resolvedParams = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   let guestName = "Special Guest";
   const slug = resolvedParams?.name && resolvedParams.name.length > 0 ? resolvedParams.name[0] : undefined;
 
@@ -42,8 +44,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const dbData = await resolveProjectData(slug, host);
 
+  const queryGuest = resolvedSearchParams?.to || resolvedSearchParams?.guest || resolvedSearchParams?.u || resolvedSearchParams?.n;
   if (dbData.guest) {
     guestName = dbData.guest.name;
+  } else if (queryGuest) {
+    guestName = formatFallbackGuestName(queryGuest);
   } else if (resolvedParams?.name && resolvedParams.name.length > 0) {
     guestName = formatFallbackGuestName(resolvedParams.name.join(" "));
   }
@@ -84,8 +89,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function Home({ params }: Props) {
+export default async function Home({ params, searchParams }: Props) {
   const resolvedParams = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
   let guestName = "Guest Name";
   const slug = resolvedParams?.name && resolvedParams.name.length > 0 ? resolvedParams.name[0] : undefined;
 
@@ -115,15 +121,20 @@ export default async function Home({ params }: Props) {
     );
   }
 
+  const queryGuest = resolvedSearchParams?.to || resolvedSearchParams?.guest || resolvedSearchParams?.u || resolvedSearchParams?.n;
   if (dbData.guest) {
     guestName = dbData.guest.name;
+  } else if (queryGuest) {
+    guestName = formatFallbackGuestName(queryGuest);
   } else if (resolvedParams?.name && resolvedParams.name.length > 0) {
     guestName = formatFallbackGuestName(resolvedParams.name.join(" "));
   }
 
   const brideNickname = dbData.project?.bride_nickname || "Natalie";
   const groomNickname = dbData.project?.groom_nickname || "Marvel";
-  const weddingDateRaw = dbData.events?.[0]?.event_date || dbData.project?.wedding_date;
+  const brideFull = dbData.project?.bride_name || "Natalie C";
+  const groomFull = dbData.project?.groom_name || "Marvel A";
+  const weddingDateRaw = dbData.events?.[0]?.event_date || dbData.project?.wedding_date || (dbData.project?.countdown_target ? dbData.project.countdown_target.split('T')[0] : null);
 
   const formatDateDot = (dateStr?: string | null) => {
     if (!dateStr) return "28 . 02 . 2028";
@@ -183,6 +194,12 @@ export default async function Home({ params }: Props) {
             <span className="text-red-600 font-gaegu font-bold text-3xl lg:text-4xl">&amp;</span> <br />
             {groomNickname}
           </h1>
+
+          {(brideFull || groomFull) && (
+            <p className="font-gaegu text-base lg:text-lg text-neutral-700 font-bold tracking-wide mb-1">
+              {brideFull} &amp; {groomFull}
+            </p>
+          )}
 
           <div className="h-0.5 w-16 bg-neutral-900 mx-auto my-3"></div>
 
