@@ -545,21 +545,21 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                 </p>
               </div>
 
-              {/* Buka Undangan Button - Simple Aesthetic */}
+              {/* Buka Undangan Button - Refined Compact Aesthetic */}
               <div className="pt-0.5 flex justify-center">
                 <motion.button
                   type="button"
-                  whileHover={{ scale: 1.03, y: -2 }}
-                  whileTap={{ scale: 0.97 }}
+                  whileHover={{ scale: 1.04, y: -1 }}
+                  whileTap={{ scale: 0.96 }}
                   onClick={handleOpenInvitation}
-                  className="relative group px-6 py-2.5 sm:py-3 rounded-full bg-[#1e1b18] hover:bg-neutral-900 text-white shadow-[0_6px_20px_-4px_rgba(0,0,0,0.3)] hover:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.4)] transition-all duration-300 flex items-center justify-center gap-2.5 border border-[#38332d] cursor-pointer overflow-hidden max-w-[240px] w-full"
+                  className="relative group inline-flex items-center justify-center gap-2 px-5 py-2 sm:py-2.5 rounded-full bg-[#1e1b18] hover:bg-neutral-900 text-white shadow-[0_4px_12px_-2px_rgba(0,0,0,0.22)] hover:shadow-[0_6px_16px_-2px_rgba(0,0,0,0.32)] transition-all duration-300 border border-[#38332d] cursor-pointer overflow-hidden mx-auto"
                 >
                   {/* Subtle shimmer sweep on hover */}
                   <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
                   {/* Delicate Minimalist Mail Icon */}
                   <svg 
-                    className="w-4 h-4 text-red-400 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300 shrink-0" 
+                    className="w-3.5 h-3.5 text-red-400 group-hover:scale-110 group-hover:-rotate-6 transition-transform duration-300 shrink-0" 
                     viewBox="0 0 24 24" 
                     fill="none" 
                     stroke="currentColor" 
@@ -571,13 +571,13 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                   </svg>
 
-                  <span className="font-gaegu font-bold text-base sm:text-lg tracking-wider text-neutral-100 group-hover:text-white transition-colors">
+                  <span className="font-gaegu font-bold text-sm sm:text-base tracking-wider text-neutral-100 group-hover:text-white transition-colors">
                     Buka Undangan
                   </span>
 
                   {/* Sleek Arrow Indicator */}
                   <svg 
-                    className="w-3.5 h-3.5 text-neutral-400 group-hover:translate-x-1 group-hover:text-white transition-all shrink-0" 
+                    className="w-3 h-3 text-neutral-400 group-hover:translate-x-0.5 group-hover:text-white transition-all shrink-0" 
                     viewBox="0 0 24 24" 
                     fill="none" 
                     stroke="currentColor" 
