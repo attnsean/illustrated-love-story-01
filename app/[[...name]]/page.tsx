@@ -39,18 +39,20 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
   let guestName = "Special Guest";
   const slug = resolvedParams?.name && resolvedParams.name.length > 0 ? resolvedParams.name[0] : undefined;
 
-  const headersList = await headers();
-  const host = headersList.get("host") || undefined;
-
-  const dbData = await resolveProjectData(slug, host);
-
   const queryGuest = resolvedSearchParams?.to || resolvedSearchParams?.guest || resolvedSearchParams?.u || resolvedSearchParams?.n;
-  if (dbData.guest) {
-    guestName = dbData.guest.name;
-  } else if (queryGuest) {
+  if (queryGuest) {
     guestName = formatFallbackGuestName(queryGuest);
   } else if (resolvedParams?.name && resolvedParams.name.length > 0) {
     guestName = formatFallbackGuestName(resolvedParams.name.join(" "));
+  }
+
+  const headersList = await headers();
+  const host = headersList.get("host") || undefined;
+
+  const dbData = await resolveProjectData(slug, host, guestName);
+
+  if (dbData.guest) {
+    guestName = dbData.guest.name;
   }
 
   const brideName = dbData.project?.bride_nickname || "Natalie";
@@ -95,10 +97,17 @@ export default async function Home({ params, searchParams }: Props) {
   let guestName = "Guest Name";
   const slug = resolvedParams?.name && resolvedParams.name.length > 0 ? resolvedParams.name[0] : undefined;
 
+  const queryGuest = resolvedSearchParams?.to || resolvedSearchParams?.guest || resolvedSearchParams?.u || resolvedSearchParams?.n;
+  if (queryGuest) {
+    guestName = formatFallbackGuestName(queryGuest);
+  } else if (resolvedParams?.name && resolvedParams.name.length > 0) {
+    guestName = formatFallbackGuestName(resolvedParams.name.join(" "));
+  }
+
   const headersList = await headers();
   const host = headersList.get("host") || undefined;
 
-  const dbData = await resolveProjectData(slug, host);
+  const dbData = await resolveProjectData(slug, host, guestName);
 
   // Check project status
   const isLive = dbData.project ? dbData.project.status === "live" : true;
@@ -121,13 +130,8 @@ export default async function Home({ params, searchParams }: Props) {
     );
   }
 
-  const queryGuest = resolvedSearchParams?.to || resolvedSearchParams?.guest || resolvedSearchParams?.u || resolvedSearchParams?.n;
   if (dbData.guest) {
     guestName = dbData.guest.name;
-  } else if (queryGuest) {
-    guestName = formatFallbackGuestName(queryGuest);
-  } else if (resolvedParams?.name && resolvedParams.name.length > 0) {
-    guestName = formatFallbackGuestName(resolvedParams.name.join(" "));
   }
 
   const brideNickname = dbData.project?.bride_nickname || "Natalie";
@@ -226,6 +230,7 @@ export default async function Home({ params, searchParams }: Props) {
         events={dbData.events}
         wishes={dbData.wishes}
         stats={dbData.stats}
+        existingRsvp={dbData.existingRsvp}
       />
       
     </main>

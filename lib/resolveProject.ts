@@ -148,6 +148,17 @@ export interface DbWish {
   created_at: string;
 }
 
+export interface DbRsvp {
+  id: string;
+  project_id: string;
+  guest_id?: string | null;
+  guest_name?: string | null;
+  attendance?: string | null;
+  pax?: number | null;
+  message?: string | null;
+  created_at?: string;
+}
+
 export interface ResolvedData {
   guest: DbGuest | null;
   project: DbProject | null;
@@ -157,9 +168,10 @@ export interface ResolvedData {
     attending: number;
     wishes: number;
   };
+  existingRsvp?: DbRsvp | null;
 }
 
-export async function resolveProjectData(slug?: string, host?: string): Promise<ResolvedData> {
+export async function resolveProjectData(slug?: string, host?: string, guestName?: string): Promise<ResolvedData> {
   const result: ResolvedData = {
     guest: null,
     project: null,
@@ -294,6 +306,30 @@ export async function resolveProjectData(slug?: string, host?: string): Promise<
           attending: totalAttending > 0 ? totalAttending : 156, // fallback to mock UI default if 0
           wishes: result.wishes ? result.wishes.length : 43
         };
+
+        // 6.5 Check existing RSVP for this guest
+        const nameToCheck = result.guest?.name || (guestName && guestName !== 'Guest Name' && guestName !== 'Special Guest' ? guestName : slug);
+        if (projectId && nameToCheck) {
+          try {
+            let rsvpQ = supabase
+              .from('rsvp')
+              .select('*')
+              .eq('project_id', projectId);
+
+            if (result.guest?.id) {
+              rsvpQ = rsvpQ.eq('guest_id', result.guest.id);
+            } else {
+              rsvpQ = rsvpQ.ilike('guest_name', nameToCheck);
+            }
+
+            const { data: existingRsvpData } = await rsvpQ.order('created_at', { ascending: false }).limit(1).maybeSingle();
+            if (existingRsvpData) {
+              result.existingRsvp = existingRsvpData;
+            }
+          } catch (rsvpErr) {
+            console.error('Error checking existing RSVP:', rsvpErr);
+          }
+        }
       }
     }
   } catch (error) {

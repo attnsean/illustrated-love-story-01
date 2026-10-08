@@ -18,9 +18,10 @@ interface Props {
     attending: number;
     wishes: number;
   };
+  existingRsvp?: any | null;
 }
 
-export default function RightSidebar({ guestName, guest, project, events, wishes: initialWishes, stats }: Props) {
+export default function RightSidebar({ guestName, guest, project, events, wishes: initialWishes, stats, existingRsvp }: Props) {
   // Couple Info
   const brideNickname = project?.bride_nickname || "Natalie";
   const groomNickname = project?.groom_nickname || "Marvel";
@@ -139,14 +140,23 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
     || (!isDefaultStorageUrl(project?.cover_photo_url) ? project?.cover_photo_url : null);
 
   // State Management
-  const [willBeThere, setWillBeThere] = useState<"yes" | "no" | null>("yes");
-  const [rsvpName, setRsvpName] = useState(guestName !== "Guest Name" ? guestName : "");
+  const isGuestLocked = Boolean(guestName && guestName !== "Guest Name" && guestName.trim() !== "");
+  const [willBeThere, setWillBeThere] = useState<"yes" | "no" | null>(
+    existingRsvp ? (existingRsvp.attendance === "not_attending" ? "no" : "yes") : "yes"
+  );
+  const [rsvpName, setRsvpName] = useState(isGuestLocked ? guestName : "");
   const [rsvpEmail, setRsvpEmail] = useState(guest?.email || "");
-  const [rsvpStatus, setRsvpStatus] = useState<string>("attending");
-  const [guestCount, setGuestCount] = useState<number>(1);
+  const [rsvpStatus, setRsvpStatus] = useState<string>(
+    existingRsvp ? (existingRsvp.attendance === "not_attending" ? "not_attending" : "attending") : "attending"
+  );
+  const [guestCount, setGuestCount] = useState<number>(existingRsvp?.pax || 1);
   const [rsvpNotes, setRsvpNotes] = useState<string>("");
   const [rsvpSubmitting, setRsvpSubmitting] = useState(false);
   const [rsvpSuccess, setRsvpSuccess] = useState(false);
+  const [hasSubmittedRsvp, setHasSubmittedRsvp] = useState(Boolean(existingRsvp));
+  const [savedAttendance, setSavedAttendance] = useState<{ status: string; pax: number } | null>(
+    existingRsvp ? { status: existingRsvp.attendance || "attending", pax: existingRsvp.pax || 1 } : null
+  );
   const [isOpened, setIsOpened] = useState(false);
 
   useEffect(() => {
@@ -261,6 +271,18 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
       if (res.ok) {
         setRsvpSuccess(true);
+        setHasSubmittedRsvp(true);
+        const savedData = {
+          status: rsvpStatus,
+          pax: guestCount,
+          submittedAt: new Date().toISOString()
+        };
+        setSavedAttendance(savedData);
+        if (typeof window !== "undefined") {
+          const targetName = (rsvpName || guestName || "anon").toLowerCase().trim();
+          localStorage.setItem(`sera_rsvp_${activeProjectId}_${encodeURIComponent(targetName)}`, JSON.stringify(savedData));
+          localStorage.setItem(`sera_rsvp_submitted_${activeProjectId}`, JSON.stringify(savedData));
+        }
       }
     } catch (err) {
       console.error("RSVP error:", err);
@@ -919,9 +941,11 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               <button
                 type="button"
                 onClick={() => {
+                  if (hasSubmittedRsvp) return;
                   setWillBeThere("yes");
                   setRsvpStatus("attending");
                 }}
+                disabled={hasSubmittedRsvp}
                 className="absolute left-[31%] top-[28%] w-[45%] h-[6%] flex items-center cursor-pointer group rounded-md transition-colors hover:bg-neutral-100/40"
                 title="Pilih Hadir (Yes!)"
               >
@@ -955,9 +979,11 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               <button
                 type="button"
                 onClick={() => {
+                  if (hasSubmittedRsvp) return;
                   setWillBeThere("no");
                   setRsvpStatus("not_attending");
                 }}
+                disabled={hasSubmittedRsvp}
                 className="absolute left-[31%] top-[35%] w-[55%] h-[8.5%] flex items-center cursor-pointer group rounded-md transition-colors hover:bg-neutral-100/40"
                 title="Pilih Tidak Hadir (Sorry, can't make it)"
               >
@@ -1011,119 +1037,159 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             />
           </div>
 
-          <form onSubmit={handleRsvpSubmit} className="space-y-4 pt-2 text-left max-w-sm mx-auto">
-            {/* Field: Guest Identity */}
-            <div>
-              <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
-                Guest Identity
-              </label>
-              <input
-                type="text"
-                required
-                value={rsvpName}
-                onChange={(e) => setRsvpName(e.target.value)}
-                placeholder="Guest Name"
-                className="w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white transition-all"
-              />
-            </div>
+          {hasSubmittedRsvp ? (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white/95 border-2 border-neutral-900 rounded-3xl p-6 shadow-sm max-w-sm mx-auto text-center space-y-3.5 my-2"
+            >
+              <div className="w-12 h-12 bg-emerald-50 border-2 border-emerald-500 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold drop-shadow-xs">
+                ✓
+              </div>
+              <div className="space-y-1">
+                <h4 className="font-gaegu font-bold text-2xl text-neutral-900 leading-tight">
+                  Konfirmasi Kehadiran Tersimpan
+                </h4>
+                <p className="font-gaegu text-sm text-neutral-600">
+                  Halo <strong>{rsvpName || guestName}</strong>, Anda telah mengonfirmasi kehadiran sebelumnya.
+                </p>
+              </div>
+              <div className="inline-block bg-neutral-50 rounded-2xl px-6 py-2.5 border-2 border-neutral-200">
+                <p className="font-gaegu font-bold text-sm text-neutral-700">
+                  Status:{" "}
+                  <span className={savedAttendance?.status === "attending" || savedAttendance?.status === "hadir" ? "text-emerald-600 font-extrabold" : "text-neutral-500 font-extrabold"}>
+                    {savedAttendance?.status === "attending" || savedAttendance?.status === "hadir"
+                      ? `✓ Hadir (${savedAttendance?.pax || 1} Orang)`
+                      : "✕ Tidak Hadir"}
+                  </span>
+                </p>
+              </div>
+              <p className="font-gaegu text-xs text-neutral-500">
+                Data kehadiran Anda telah tercatat di sistem kami. Terima kasih!
+              </p>
+            </motion.div>
+          ) : (
+            <form onSubmit={handleRsvpSubmit} className="space-y-4 pt-2 text-left max-w-sm mx-auto">
+              {/* Field: Guest Identity */}
+              <div>
+                <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
+                  Guest Identity
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={isGuestLocked ? guestName : rsvpName}
+                  onChange={(e) => {
+                    if (!isGuestLocked) setRsvpName(e.target.value);
+                  }}
+                  readOnly={isGuestLocked}
+                  placeholder="Guest Name"
+                  className={`w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none transition-all ${
+                    isGuestLocked
+                      ? "bg-neutral-100/90 cursor-not-allowed select-none text-neutral-700 font-bold"
+                      : "bg-white focus:ring-2 focus:ring-neutral-900"
+                  }`}
+                />
+              </div>
 
-            {/* Field: Email Address */}
-            <div>
-              <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={rsvpEmail}
-                onChange={(e) => setRsvpEmail(e.target.value)}
-                placeholder="To Receive your digital invitation"
-                className="w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white transition-all"
-              />
-            </div>
+              {/* Field: Email Address */}
+              <div>
+                <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={rsvpEmail}
+                  onChange={(e) => setRsvpEmail(e.target.value)}
+                  placeholder="To Receive your digital invitation"
+                  className="w-full border-2 border-neutral-900 rounded-full px-5 py-2.5 font-gaegu text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white transition-all"
+                />
+              </div>
 
-            {/* Field: Number of Guests */}
-            <div>
-              <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
-                Number of Guests
-              </label>
-              <div className="relative">
-                <select
-                  value={guestCount}
-                  onChange={(e) => setGuestCount(Number(e.target.value))}
-                  className="w-full appearance-none border-2 border-neutral-900 rounded-full pl-5 pr-11 py-2.5 font-gaegu text-base font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white transition-all cursor-pointer shadow-xs"
-                >
-                  <option value={1}>1 Person</option>
-                  <option value={2}>2 Persons</option>
-                  <option value={3}>3 Persons</option>
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-800 flex items-center justify-center">
-                  <svg className="w-4 h-4 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                  </svg>
+              {/* Field: Number of Guests */}
+              <div>
+                <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
+                  Number of Guests
+                </label>
+                <div className="relative">
+                  <select
+                    value={guestCount}
+                    onChange={(e) => setGuestCount(Number(e.target.value))}
+                    className="w-full appearance-none border-2 border-neutral-900 rounded-full pl-5 pr-11 py-2.5 font-gaegu text-base font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-neutral-900 bg-white transition-all cursor-pointer shadow-xs"
+                  >
+                    <option value={1}>1 Person</option>
+                    <option value={2}>2 Persons</option>
+                    <option value={3}>3 Persons</option>
+                  </select>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-800 flex items-center justify-center">
+                    <svg className="w-4 h-4 stroke-[3]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Field: Confirmation Presence Status */}
-            <div>
-              <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
-                Confirmation of Presence
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRsvpStatus("attending");
-                    setWillBeThere("yes");
-                  }}
-                  className={`py-2 px-4 rounded-full font-gaegu font-bold text-sm border-2 border-neutral-900 transition-all ${
-                    rsvpStatus === "attending" ? "bg-neutral-900 text-white shadow-sm" : "bg-white text-neutral-800 hover:bg-neutral-100"
-                  }`}
-                >
-                  ✓ Hadir (Yes!)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRsvpStatus("not_attending");
-                    setWillBeThere("no");
-                  }}
-                  className={`py-2 px-4 rounded-full font-gaegu font-bold text-sm border-2 border-neutral-900 transition-all ${
-                    rsvpStatus === "not_attending" ? "bg-neutral-900 text-white shadow-sm" : "bg-white text-neutral-800 hover:bg-neutral-100"
-                  }`}
-                >
-                  ✕ Tidak Hadir
-                </button>
+              {/* Field: Confirmation Presence Status */}
+              <div>
+                <label className="block text-xs font-gaegu font-bold text-neutral-900 mb-1 ml-2">
+                  Confirmation of Presence
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRsvpStatus("attending");
+                      setWillBeThere("yes");
+                    }}
+                    className={`py-2 px-4 rounded-full font-gaegu font-bold text-sm border-2 border-neutral-900 transition-all ${
+                      rsvpStatus === "attending" ? "bg-neutral-900 text-white shadow-sm" : "bg-white text-neutral-800 hover:bg-neutral-100"
+                    }`}
+                  >
+                    ✓ Hadir (Yes!)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRsvpStatus("not_attending");
+                      setWillBeThere("no");
+                    }}
+                    className={`py-2 px-4 rounded-full font-gaegu font-bold text-sm border-2 border-neutral-900 transition-all ${
+                      rsvpStatus === "not_attending" ? "bg-neutral-900 text-white shadow-sm" : "bg-white text-neutral-800 hover:bg-neutral-100"
+                    }`}
+                  >
+                    ✕ Tidak Hadir
+                  </button>
+                </div>
               </div>
-            </div>
 
-            {/* Confirm Presence Button */}
-            <div className="pt-3 flex justify-center">
-              <motion.button
-                type="submit"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                disabled={rsvpSubmitting}
-                className="relative group select-none"
-              >
-                <img 
-                  src={ASSETS.btnConfirmPresence} 
-                  alt="Confirm Presence" 
-                  className="w-44 h-auto object-contain drop-shadow-sm group-hover:drop-shadow-md transition-all" 
-                />
-              </motion.button>
-            </div>
+              {/* Confirm Presence Button */}
+              <div className="pt-3 flex justify-center">
+                <motion.button
+                  type="submit"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  disabled={rsvpSubmitting}
+                  className="relative group select-none"
+                >
+                  <img 
+                    src={ASSETS.btnConfirmPresence} 
+                    alt="Confirm Presence" 
+                    className="w-44 h-auto object-contain drop-shadow-sm group-hover:drop-shadow-md transition-all" 
+                  />
+                </motion.button>
+              </div>
 
-            {rsvpSuccess && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-center text-xs font-gaegu font-bold text-emerald-600 bg-emerald-50 py-2 rounded-xl border border-emerald-200 mt-2"
-              >
-                Terima kasih! Konfirmasi kehadiran Anda telah tersimpan.
-              </motion.div>
-            )}
-          </form>
+              {rsvpSuccess && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center text-xs font-gaegu font-bold text-emerald-600 bg-emerald-50 py-2 rounded-xl border border-emerald-200 mt-2"
+                >
+                  Terima kasih! Konfirmasi kehadiran Anda telah tersimpan.
+                </motion.div>
+              )}
+            </form>
+          )}
         </motion.section>
 
         {/* 8. BLESSINGS & WISHES SECTION */}
@@ -1232,9 +1298,6 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                     <h5 className="font-gaegu font-bold text-sm text-neutral-900">
                       {w.name}
                     </h5>
-                    <span className="text-[10px] font-gaegu font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                      {"Hadir"}
-                    </span>
                   </div>
                   <p className="font-gaegu font-light text-xs text-neutral-700 leading-relaxed">
                     {w.message}
