@@ -233,7 +233,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
   const handleOpenInvitation = () => {
     setIsOpened(true);
-    if (audioRef.current && !isPlaying) {
+    if (!userPausedRef.current && audioRef.current && !isPlaying) {
       audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
     }
   };
@@ -273,24 +273,31 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   // Music Player
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const userPausedRef = useRef(false);
 
   useEffect(() => {
     const handleFirstClick = () => {
+      if (userPausedRef.current) return;
       if (audioRef.current && !isPlaying) {
         audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
       }
-      window.removeEventListener("click", handleFirstClick);
     };
-    window.addEventListener("click", handleFirstClick);
+    window.addEventListener("click", handleFirstClick, { once: true });
     return () => window.removeEventListener("click", handleFirstClick);
-  }, [isPlaying]);
+  }, []);
 
-  const toggleMusic = () => {
+  const toggleMusic = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     if (!audioRef.current) return;
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
+      userPausedRef.current = true;
     } else {
+      userPausedRef.current = false;
       audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
     }
   };
@@ -386,7 +393,14 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   return (
     <div className={`relative w-full md:w-[42%] lg:w-[38%] ${isOpened ? "min-h-[100dvh] md:h-[100dvh] md:overflow-y-auto md:overflow-x-hidden" : "h-[100dvh] max-h-[100dvh] overflow-hidden overscroll-none touch-none"} bg-[#faf9f6] text-neutral-900 selection:bg-red-500 selection:text-white border-l border-neutral-200 shadow-2xl flex-shrink-0`}>
       {/* Audio Element */}
-      <audio ref={audioRef} src={project?.music_url || "/audio/bgm.mp3"} loop preload="auto" />
+      <audio 
+        ref={audioRef} 
+        src={project?.music_url || "/audio/bgm.mp3"} 
+        loop 
+        preload="auto" 
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+      />
 
       {/* Floating Ambient Doodles & Hearts in Background */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30">
