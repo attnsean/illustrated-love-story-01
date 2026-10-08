@@ -21,6 +21,13 @@ interface Props {
   existingRsvp?: any | null;
 }
 
+const formatHonorific = (name?: string | null, prefix: string = "") => {
+  if (!name || !name.trim()) return "";
+  const trimmed = name.trim();
+  if (/^(bpk\.?|bapak|ibu)/i.test(trimmed)) return trimmed;
+  return `${prefix} ${trimmed}`;
+};
+
 export default function RightSidebar({ guestName, guest, project, events, wishes: initialWishes, stats, existingRsvp }: Props) {
   // Couple Info
   const brideNickname = project?.bride_nickname || "Natalie";
@@ -590,12 +597,12 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               </p>
               {Boolean((project as any)?.bride_father || (project as any)?.bride_mother) && (
                 <p className="font-gaegu text-xs sm:text-sm text-neutral-600">
-                  Putri dari {(project as any)?.bride_father ? `Bpk. ${(project as any).bride_father}` : ""}{Boolean((project as any)?.bride_father && (project as any)?.bride_mother) ? " & " : ""}{(project as any)?.bride_mother ? `Ibu ${(project as any).bride_mother}` : ""}
+                  Putri dari {formatHonorific((project as any)?.bride_father, "Bpk.")}{Boolean((project as any)?.bride_father && (project as any)?.bride_mother) ? " & " : ""}{formatHonorific((project as any)?.bride_mother, "Ibu")}
                 </p>
               )}
               {Boolean((project as any)?.groom_father || (project as any)?.groom_mother) && (
                 <p className="font-gaegu text-xs sm:text-sm text-neutral-600">
-                  Putra dari {(project as any)?.groom_father ? `Bpk. ${(project as any).groom_father}` : ""}{Boolean((project as any)?.groom_father && (project as any)?.groom_mother) ? " & " : ""}{(project as any)?.groom_mother ? `Ibu ${(project as any).groom_mother}` : ""}
+                  Putra dari {formatHonorific((project as any)?.groom_father, "Bpk.")}{Boolean((project as any)?.groom_father && (project as any)?.groom_mother) ? " & " : ""}{formatHonorific((project as any)?.groom_mother, "Ibu")}
                 </p>
               )}
             </motion.div>
