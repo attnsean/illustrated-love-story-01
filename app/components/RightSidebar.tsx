@@ -432,17 +432,29 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         type="button"
         whileHover={{ scale: 1.15 }}
         whileTap={{ scale: 0.9 }}
-        onClick={toggleMusic}
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-lg border border-neutral-300 flex items-center justify-center text-neutral-900 transition-all hover:bg-neutral-900 hover:text-white group"
-        title={isPlaying ? "Pause Music" : "Play Music"}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleMusic(e);
+        }}
+        className="fixed bottom-6 right-6 z-50 w-12 h-12 bg-white/95 backdrop-blur-md rounded-full shadow-lg border border-neutral-300 flex items-center justify-center text-neutral-900 transition-all hover:bg-neutral-900 hover:text-white group cursor-pointer"
+        title={isPlaying ? "Jeda Musik (Pause)" : "Putar Musik (Play)"}
       >
-        <motion.span
-          animate={isPlaying ? { rotate: 360 } : { rotate: 0 }}
-          transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
-          className="text-xl inline-block"
-        >
-          🎵
-        </motion.span>
+        {isPlaying ? (
+          <motion.span
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+            className="text-xl inline-block select-none"
+          >
+            🎵
+          </motion.span>
+        ) : (
+          <span className="flex items-center justify-center text-neutral-700 group-hover:text-white transition-colors">
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+              <rect x="6" y="4" width="3.5" height="16" rx="1.2" />
+              <rect x="14.5" y="4" width="3.5" height="16" rx="1.2" />
+            </svg>
+          </span>
+        )}
         {isPlaying && (
           <motion.div
             initial={{ opacity: 0, y: 0 }}
