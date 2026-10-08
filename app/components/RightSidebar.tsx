@@ -1145,7 +1145,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               <span className="text-red-500 font-bold text-xs">♥ with love</span>
             </div>
 
-            <div className="space-y-3 max-h-80 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-neutral-300">
+            <div className="space-y-3.5 max-h-[520px] sm:max-h-[580px] overflow-y-auto p-1.5 pb-6 scrollbar-thin scrollbar-thumb-neutral-300 scrollbar-track-transparent">
               {wishesList.map((w, idx) => (
                 <motion.div
                   key={w.id || idx}
@@ -1154,7 +1154,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                   viewport={{ once: false, amount: 0.2 }}
                   transition={{ delay: idx * 0.08 }}
                   whileHover={{ scale: 1.02 }}
-                  className={`bg-white border-2 border-neutral-900 rounded-2xl p-4 shadow-sm relative overflow-hidden transition-all ${
+                  className={`bg-white border-2 border-neutral-900 rounded-2xl p-4 shadow-sm relative transition-all ${
                     idx % 2 === 0 ? "rotate-[-0.5deg]" : "rotate-[0.5deg]"
                   }`}
                 >
