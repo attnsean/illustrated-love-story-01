@@ -459,42 +459,48 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                   <img
                     src={ASSETS.couple}
                     alt="Illustrated Couple"
-                    className="max-h-[44vh] sm:max-h-[48vh] max-w-[95%] sm:max-w-full w-auto h-auto object-contain select-none pointer-events-none drop-shadow-md transition-all"
+                    className="max-h-[38vh] sm:max-h-[42vh] max-w-[95%] sm:max-w-full w-auto h-auto object-contain select-none pointer-events-none drop-shadow-md transition-all"
                   />
                 </motion.div>
               )}
 
-              <div className="mt-2 sm:mt-2.5 inline-block px-4 py-0.5 rounded-full border border-neutral-300 bg-white/90 shadow-xs shrink-0">
-                <p className="font-gaegu font-bold text-xs sm:text-sm tracking-widest text-neutral-800">
+              <div className="mt-2 mb-1 inline-flex items-center gap-2 px-3.5 py-0.5 rounded-full border border-neutral-300/80 bg-white/80 backdrop-blur-xs shadow-2xs shrink-0">
+                <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
+                <p className="font-gaegu font-bold text-xs sm:text-sm tracking-[0.2em] text-neutral-800">
                   {formattedDate}
                 </p>
+                <span className="w-1 h-1 rounded-full bg-red-400 shrink-0" />
               </div>
             </div>
 
-            {/* Bottom: Guest Greeting & "Buka Undangan" Button */}
-            <div className="relative z-10 w-full max-w-xs sm:max-w-sm space-y-2 pb-1 shrink-0">
-              <div className="space-y-0.5">
-                <p className="font-gaegu font-bold text-[11px] sm:text-xs text-neutral-500">
-                  Kepada Yth. Bapak/Ibu/Saudara/i:
-                </p>
-                <div className="bg-white border-2 border-neutral-900 rounded-full px-4 py-1 shadow-sm inline-block max-w-full">
-                  <p className="font-gaegu font-bold text-sm sm:text-base text-neutral-900 truncate">
+            {/* Bottom: Guest Greeting Card & "Buka Undangan" Button */}
+            <div className="relative z-10 w-full max-w-[280px] sm:max-w-[310px] space-y-3 pb-1 shrink-0 mx-auto">
+              <div className="bg-white/85 backdrop-blur-md rounded-2xl border border-neutral-200/90 p-3 sm:p-3.5 shadow-[0_4px_18px_-4px_rgba(0,0,0,0.06)] space-y-1.5 transition-all">
+                <div className="flex items-center justify-center gap-2 text-neutral-400">
+                  <span className="h-[1px] w-5 bg-neutral-200" />
+                  <p className="font-gaegu font-bold text-[11px] sm:text-xs text-neutral-500 uppercase tracking-wider">
+                    Kepada Yth. Bapak/Ibu/Saudara/i:
+                  </p>
+                  <span className="h-[1px] w-5 bg-neutral-200" />
+                </div>
+                <div className="px-2 py-0.5">
+                  <p className="font-gaegu font-bold text-lg sm:text-xl text-neutral-900 tracking-wide truncate drop-shadow-2xs">
                     {guestName}
                   </p>
                 </div>
-                <p className="font-gaegu font-light text-[9px] sm:text-[10px] text-neutral-400 italic">
+                <p className="font-gaegu font-light text-[9.5px] sm:text-[10px] text-neutral-400 italic leading-tight">
                   *Mohon maaf jika ada kesalahan penulisan nama/gelar
                 </p>
               </div>
 
               {/* Buka Undangan Button - Simple Aesthetic */}
-              <div className="pt-1 flex justify-center">
+              <div className="pt-0.5 flex justify-center">
                 <motion.button
                   type="button"
-                  whileHover={{ scale: 1.04, y: -1 }}
-                  whileTap={{ scale: 0.96 }}
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={handleOpenInvitation}
-                  className="relative group px-6 py-2.5 sm:py-3 rounded-full bg-[#1e1b18] hover:bg-neutral-900 text-white shadow-md hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2.5 border border-[#38332d] cursor-pointer overflow-hidden max-w-[240px] w-full"
+                  className="relative group px-6 py-2.5 sm:py-3 rounded-full bg-[#1e1b18] hover:bg-neutral-900 text-white shadow-[0_6px_20px_-4px_rgba(0,0,0,0.3)] hover:shadow-[0_10px_24px_-4px_rgba(0,0,0,0.4)] transition-all duration-300 flex items-center justify-center gap-2.5 border border-[#38332d] cursor-pointer overflow-hidden max-w-[240px] w-full"
                 >
                   {/* Subtle shimmer sweep on hover */}
                   <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
@@ -507,7 +513,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                     stroke="currentColor" 
                     strokeWidth="2" 
                     strokeLinecap="round" 
-                    strokeLinejoin="round"
+                    strokeLinejoin="round" 
                   >
                     <rect width="20" height="16" x="2" y="4" rx="3" />
                     <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
@@ -525,7 +531,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                     stroke="currentColor" 
                     strokeWidth="2.5" 
                     strokeLinecap="round" 
-                    strokeLinejoin="round"
+                    strokeLinejoin="round" 
                   >
                     <path d="m9 18 6-6-6-6" />
                   </svg>
