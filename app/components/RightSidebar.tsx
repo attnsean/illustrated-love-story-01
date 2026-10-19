@@ -231,6 +231,12 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         },
       ];
 
+  // Cashless feature check:
+  const isCashlessEnabled = Boolean(
+    (project as any)?.has_cashless || 
+    (project as any)?.subscriptions?.packages?.has_amplop_digital
+  );
+
   // Bank Info
   let paymentAccounts: any[] = [];
   try {
@@ -1259,6 +1265,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
           </motion.section>
         )}
 
+        {isCashlessEnabled && (
         {/* 5. WEDDING GIFT SECTION */}
         <motion.section 
           initial={{ opacity: 0, y: 40, scale: 0.96 }}
@@ -1285,7 +1292,44 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3 pt-3">
+          <div className={`grid ${paymentAccounts.length === 1 ? "grid-cols-1 max-w-xs mx-auto" : "grid-cols-2"} gap-3 pt-3`}>
+            {paymentAccounts.length > 0 ? (
+              paymentAccounts.map((acc: any, idx: number) => {
+                const bankName = acc.provider || acc.bank_name || "BANK BCA";
+                const accNum = acc.account_number || "";
+                const ownerName = acc.account_name || acc.owner_name || (idx === 0 ? brideFull : groomFull);
+                const nick = idx === 0 ? (brideBank.nickname || brideNickname) : (groomBank.nickname || groomNickname);
+
+                return (
+                  <motion.div 
+                    key={idx}
+                    initial={{ opacity: 0, y: 20, scale: 0.96 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: false, amount: 0.2 }}
+                    transition={{ duration: 0.6, delay: 0.1 * (idx + 1) }}
+                    whileHover={{ y: -5, scale: 1.02 }} 
+                    className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-4 sm:p-5 shadow-sm"
+                  >
+                    <div className="w-7 h-7 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-7 bg-white mb-2 shadow-xs">
+                      <span className="text-xs text-red-500">♥</span>
+                    </div>
+
+                    <div className="border border-red-500 rounded-full px-4 py-0.5 mb-2 bg-transparent">
+                      <span className="font-gaegu font-bold text-xl sm:text-2xl text-red-500 block leading-tight">
+                        {nick}
+                      </span>
+                    </div>
+
+                    <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{formatBankTitle(bankName)}</span>
+                    <span className="font-gaegu font-bold text-2xl sm:text-3xl text-neutral-900 tracking-widest my-0.5 select-all">{accNum}</span>
+                    <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {ownerName}</span>
+
+                    <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => copyToClipboard(accNum, "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></motion.button>
+                  </motion.div>
+                );
+              })
+            ) : (
+              <>
             {/* Bride Tag Card */}
             <motion.div 
               initial={{ opacity: 0, x: -30, y: 20, scale: 0.96 }}
@@ -1342,6 +1386,9 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => copyToClipboard(groomBank.account_number || "777555005", "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></motion.button>
             </motion.div>
           </div>
+              </>
+            )}
+          </div>
 
           {/* Red Note Box */}
           <motion.div 
@@ -1357,6 +1404,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             <p className="text-xs sm:text-sm font-bold leading-snug">- Konfirmasi pengiriman kado/tanda kasih melalui pesan pribadi kepada mempelai</p>
           </motion.div>
         </motion.section>
+        )}
 
         {/* 6. RSVP SECTION (ARCH ILLUSTRATION) */}
         <motion.section 
