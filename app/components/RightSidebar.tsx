@@ -151,9 +151,63 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   };
   const formattedTime = extractTime();
 
+
+
   const venueName = mainEvent?.venue_name || (project as any)?.venue_name || "Villa Dago";
   const venueAddress = mainEvent?.venue_address || (project as any)?.venue_address || "Jl. Dago Pakar Permai No. 1, Bandung";
   const mapsUrl = mainEvent?.venue_maps_url || (project as any)?.venue_maps_url || "https://maps.google.com";
+
+  // Countdown Timer
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  useEffect(() => {
+    const getTargetTimestamp = () => {
+      if (project?.countdown_target) {
+        const t = new Date(project.countdown_target).getTime();
+        if (!isNaN(t)) return t;
+      }
+      const dateStr = weddingDateRaw || "2028-02-28";
+      let timeStr = "15:00:00";
+      if (mainEvent?.event_time) {
+        timeStr = mainEvent.event_time.length === 5 ? mainEvent.event_time + ":00" : mainEvent.event_time;
+      } else if ((project as any)?.wedding_time) {
+        const wt = (project as any).wedding_time;
+        timeStr = wt.length === 5 ? wt + ":00" : wt;
+      }
+      const isoStr = dateStr + "T" + timeStr;
+      const parsed = new Date(isoStr).getTime();
+      if (!isNaN(parsed)) return parsed;
+      const fallback = new Date(dateStr).getTime();
+      if (!isNaN(fallback)) return fallback;
+      return new Date("2028-02-28T15:00:00").getTime();
+    };
+
+    const targetTime = getTargetTimestamp();
+    const updateCountdown = () => {
+      const now = Date.now();
+      const diff = Math.max(0, targetTime - now);
+      setTimeLeft({
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
+        seconds: Math.floor((diff % (1000 * 60)) / 1000),
+      });
+    };
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+    return () => clearInterval(interval);
+  }, [project?.countdown_target, weddingDateRaw, mainEvent?.event_time]);
+
+  const googleCalendarUrl = (() => {
+    const title = encodeURIComponent("The Wedding of " + brideNickname + " & " + groomNickname);
+    const details = encodeURIComponent("The Wedding Celebration of " + brideFull + " & " + groomFull + ".\n\nLocation: " + venueName + ", " + venueAddress);
+    const location = encodeURIComponent(venueName + ", " + venueAddress);
+    const rawDateClean = (weddingDateRaw || "2028-02-28").replace(/[-:]/g, "");
+    const timeRawClean = formattedTime.slice(0, 5).replace(":", "") || "1500";
+    const startStamp = rawDateClean + "T" + timeRawClean + "00";
+    const endStamp = rawDateClean + "T" + String(Number(timeRawClean.slice(0, 2)) + 3).padStart(2, "0") + timeRawClean.slice(2) + "00";
+    return "https://calendar.google.com/calendar/render?action=TEMPLATE&text=" + title + "&details=" + details + "&location=" + location + "&dates=" + startStamp + "/" + endStamp;
+  })();
+
 
   // Story Milestones
   const dbStories = (project as any)?.love_story_items || (project as any)?.wedding_stories;
@@ -857,6 +911,85 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             >
               <img src={ASSETS.pinIcon} alt="Pin" className="w-4 h-4 object-contain brightness-0 invert group-hover:animate-bounce" />
               <span>OPEN MAP</span>
+            </motion.a>
+          </div>
+        </motion.section>
+
+
+        {/* COUNTDOWN SECTION */}
+        <motion.section 
+          initial={{ opacity: 0, y: 40, scale: 0.96 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: false, amount: 0.15, margin: "-30px" }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="text-center space-y-4 pt-4"
+        >
+          <p className="text-xs sm:text-sm font-gaegu tracking-[0.2em] text-neutral-800 uppercase font-bold">
+            counting down to our forever
+          </p>
+
+          <div className="flex justify-center">
+            <ScrollAnimatedTitle
+              lines={[{ text: "Countdown", className: "text-neutral-900" }]}
+              className="font-melody text-5xl sm:text-6xl"
+            />
+          </div>
+
+          {/* 4 Cards Grid */}
+          <div className="grid grid-cols-4 gap-2 sm:gap-3 max-w-[320px] sm:max-w-sm mx-auto pt-1">
+            {[
+              { label: "Days", value: timeLeft.days },
+              { label: "Hours", value: timeLeft.hours },
+              { label: "Minutes", value: timeLeft.minutes },
+              { label: "Seconds", value: timeLeft.seconds },
+            ].map((item, idx) => (
+              <motion.div
+                key={idx}
+                whileHover={{ y: -3, scale: 1.04 }}
+                transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                className="flex flex-col items-center justify-center p-2.5 sm:p-3 bg-white border-2 border-neutral-900 rounded-2xl shadow-sm relative group overflow-hidden"
+              >
+                <div className="font-gaegu font-bold text-2xl sm:text-3xl text-neutral-900 leading-none tabular-nums">
+                  {String(item.value).padStart(2, "0")}
+                </div>
+                <div className="font-gaegu text-[10px] sm:text-xs font-bold text-neutral-500 uppercase tracking-widest mt-1">
+                  {item.label}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Save to Calendar Button */}
+          <div className="pt-2 flex justify-center">
+            <motion.a
+              whileHover={{ scale: 1.05, y: -2 }}
+              whileTap={{ scale: 0.95 }}
+              href={googleCalendarUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 bg-white border-2 border-neutral-900 text-neutral-900 font-gaegu font-bold text-xs sm:text-sm tracking-wider px-6 py-2.5 rounded-full hover:bg-neutral-50 transition-all shadow-sm group"
+            >
+              <svg 
+                className="w-4 h-4 text-red-500 group-hover:scale-110 transition-transform" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
+                <line x1="16" x2="16" y1="2" y2="6" />
+                <line x1="8" x2="8" y1="2" y2="6" />
+                <line x1="3" x2="21" y1="10" y2="10" />
+                <path d="M8 14h.01" />
+                <path d="M12 14h.01" />
+                <path d="M16 14h.01" />
+                <path d="M8 18h.01" />
+                <path d="M12 18h.01" />
+                <path d="M16 18h.01" />
+              </svg>
+              <span>SAVE TO CALENDAR</span>
             </motion.a>
           </div>
         </motion.section>
