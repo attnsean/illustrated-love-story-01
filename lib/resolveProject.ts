@@ -183,9 +183,9 @@ export async function resolveProjectData(slug?: string, host?: string, guestName
   };
 
   try {
-    let projectId = process.env.NEXT_PUBLIC_PROJECT_ID || '';
+    let projectId = process.env.NEXT_PUBLIC_PROJECT_ID || '1bf6f05c-f64a-40c9-b67a-490b52289bd4' || '';
     if (projectId === 'undefined') {
-      projectId = '';
+      projectId = '1bf6f05c-f64a-40c9-b67a-490b52289bd4';
     }
 
     // 1. Resolve guest by slug if provided
