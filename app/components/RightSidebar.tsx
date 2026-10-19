@@ -112,8 +112,18 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   // Couple Info
   const brideNickname = project?.bride_nickname || "Natalie";
   const groomNickname = project?.groom_nickname || "Marvel";
-  const brideFull = project?.bride_name || "Natalie C";
-  const groomFull = project?.groom_name || "Marvel A";
+  const brideFull = project?.bride_name || "Natalie Claudia";
+  const groomFull = project?.groom_name || "Marvel Alexander";
+
+  const defaultBrideFather = "Bpk. Hendra Claudia";
+  const defaultBrideMother = "Ibu Maria Natalia";
+  const defaultGroomFather = "Bpk. Robert Alexander";
+  const defaultGroomMother = "Ibu Sarah Alexander";
+
+  const brideFather = (project as any)?.bride_father || defaultBrideFather;
+  const brideMother = (project as any)?.bride_mother || defaultBrideMother;
+  const groomFather = (project as any)?.groom_father || defaultGroomFather;
+  const groomMother = (project as any)?.groom_mother || defaultGroomMother;
 
   // Event Info
   const mainEvent = events && events.length > 0 ? events[0] : null;
@@ -825,14 +835,14 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
               <p className="font-gaegu text-lg sm:text-xl font-bold text-neutral-800 tracking-wide">
                 {brideFull} &amp; {groomFull}
               </p>
-              {Boolean((project as any)?.bride_father || (project as any)?.bride_mother) && (
+              {Boolean(brideFather || brideMother) && (
                 <p className="font-gaegu text-xs sm:text-sm text-neutral-600">
-                  Putri dari {formatHonorific((project as any)?.bride_father, "Bpk.")}{Boolean((project as any)?.bride_father && (project as any)?.bride_mother) ? " & " : ""}{formatHonorific((project as any)?.bride_mother, "Ibu")}
+                  Putri dari {formatHonorific(brideFather, "Bpk.")}{Boolean(brideFather && brideMother) ? " & " : ""}{formatHonorific(brideMother, "Ibu")}
                 </p>
               )}
-              {Boolean((project as any)?.groom_father || (project as any)?.groom_mother) && (
+              {Boolean(groomFather || groomMother) && (
                 <p className="font-gaegu text-xs sm:text-sm text-neutral-600">
-                  Putra dari {formatHonorific((project as any)?.groom_father, "Bpk.")}{Boolean((project as any)?.groom_father && (project as any)?.groom_mother) ? " & " : ""}{formatHonorific((project as any)?.groom_mother, "Ibu")}
+                  Putra dari {formatHonorific(groomFather, "Bpk.")}{Boolean(groomFather && groomMother) ? " & " : ""}{formatHonorific(groomMother, "Ibu")}
                 </p>
               )}
             </motion.div>
