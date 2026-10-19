@@ -890,80 +890,155 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             />
           </div>
 
-          <div className="space-y-4 pt-2">
-            {/* Calendar */}
-            <motion.div 
-              initial={{ opacity: 0, x: -30, y: 20 }}
-              whileInView={{ opacity: 1, x: 0, y: 0 }}
-              viewport={{ once: false, amount: 0.2 }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-              whileHover={{ scale: 1.04, y: -2 }}
-              className="flex items-center justify-center gap-3 bg-white/70 backdrop-blur-sm py-2 px-4 rounded-full border border-neutral-200/80 shadow-sm max-w-xs mx-auto"
-            >
-              <img src={ASSETS.calendarIcon} alt="Calendar" className="w-6 h-6 object-contain" />
-              <span className="font-gaegu text-xl sm:text-2xl font-bold text-neutral-900 tracking-wider">
-                {formattedDate}
-              </span>
-            </motion.div>
+          {events && events.length > 1 ? (
+            <div className="space-y-4 pt-2">
+              {events.map((evt: any, idx: number) => {
+                const evtTitle = evt.custom_label || (
+                  evt.event_type === "akad" ? "Akad Nikah" :
+                  evt.event_type === "resepsi" ? "Resepsi Pernikahan" :
+                  evt.event_type === "pemberkatan" ? "Pemberkatan" :
+                  evt.event_type === "siraman" ? "Siraman" :
+                  evt.event_type === "midodareni" ? "Midodareni" :
+                  evt.event_type === "pengajian" ? "Pengajian" :
+                  evt.event_type === "pawiwahan" ? "Pawiwahan" :
+                  evt.event_type === "ngaben" ? "Ngaben" :
+                  `Sesi Acara #${idx + 1}`
+                );
+                const evtDate = formatDateDisplay(evt.event_date || weddingDateRaw);
+                const evtTime = evt.event_time ? `${evt.event_time.slice(0, 5)}${evt.end_time ? ` - ${evt.end_time.slice(0, 5)}` : ""} WIB` : formattedTime;
+                const evtVenue = evt.venue_name || venueName;
+                const evtAddr = evt.venue_address || "";
+                const evtMaps = evt.venue_maps_url || mapsUrl;
 
-            {/* Time */}
-            <motion.div 
-              initial={{ opacity: 0, x: 30, y: 20 }}
-              whileInView={{ opacity: 1, x: 0, y: 0 }}
-              viewport={{ once: false, amount: 0.2 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              whileHover={{ scale: 1.04, y: -2 }}
-              className="flex items-center justify-center gap-3 bg-white/70 backdrop-blur-sm py-2 px-4 rounded-full border border-neutral-200/80 shadow-sm max-w-xs mx-auto"
-            >
-              <img src={ASSETS.clockIcon} alt="Clock" className="w-6 h-6 object-contain" />
-              <span className="font-gaegu text-xl sm:text-2xl font-bold text-neutral-900 tracking-wider">
-                {formattedTime}
-              </span>
-            </motion.div>
+                return (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 25 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: false, amount: 0.2 }}
+                    transition={{ duration: 0.5, delay: idx * 0.1 }}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    className="bg-white/80 backdrop-blur-sm p-4 sm:p-5 rounded-3xl border border-neutral-200/80 shadow-sm max-w-sm mx-auto space-y-3 text-center"
+                  >
+                    <div className="inline-block px-4 py-1 bg-neutral-900 text-white rounded-full text-xs font-gaegu font-bold tracking-widest uppercase shadow-xs">
+                      {evtTitle}
+                    </div>
+                    <div className="space-y-2 text-neutral-800">
+                      <div className="flex items-center justify-center gap-2">
+                        <img src={ASSETS.calendarIcon} alt="Calendar" className="w-5 h-5 object-contain" />
+                        <span className="font-gaegu text-xl sm:text-2xl font-bold tracking-wide">{evtDate}</span>
+                      </div>
+                      <div className="flex items-center justify-center gap-2">
+                        <img src={ASSETS.clockIcon} alt="Clock" className="w-5 h-5 object-contain" />
+                        <span className="font-gaegu text-xl sm:text-2xl font-bold tracking-wide">{evtTime}</span>
+                      </div>
+                      <div className="flex flex-col items-center justify-center gap-0.5">
+                        <div className="flex items-center justify-center gap-2">
+                          <img src={ASSETS.pinIcon} alt="Pin" className="w-5 h-5 object-contain" />
+                          <span className="font-gaegu text-xl sm:text-2xl font-bold tracking-wide text-center">{evtVenue}</span>
+                        </div>
+                        {evtAddr && (
+                          <p className="text-xs text-neutral-600 font-gaegu text-center px-2 mt-0.5">{evtAddr}</p>
+                        )}
+                      </div>
+                    </div>
+                    {evtMaps && (
+                      <div className="pt-1 flex justify-center">
+                        <motion.a
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          href={evtMaps}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-2 bg-neutral-900 text-white font-gaegu font-bold text-xs tracking-wider px-6 py-2 rounded-full hover:bg-neutral-800 transition-all shadow-sm group"
+                        >
+                          <img src={ASSETS.pinIcon} alt="Pin" className="w-3.5 h-3.5 object-contain brightness-0 invert group-hover:animate-bounce" />
+                          <span>OPEN MAP</span>
+                        </motion.a>
+                      </div>
+                    )}
+                  </motion.div>
+                );
+              })}
+            </div>
+          ) : (
+            <>
+              <div className="space-y-4 pt-2">
+                {/* Calendar */}
+                <motion.div 
+                  initial={{ opacity: 0, x: -30, y: 20 }}
+                  whileInView={{ opacity: 1, x: 0, y: 0 }}
+                  viewport={{ once: false, amount: 0.2 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  className="flex items-center justify-center gap-3 bg-white/70 backdrop-blur-sm py-2 px-4 rounded-full border border-neutral-200/80 shadow-sm max-w-xs mx-auto"
+                >
+                  <img src={ASSETS.calendarIcon} alt="Calendar" className="w-6 h-6 object-contain" />
+                  <span className="font-gaegu text-xl sm:text-2xl font-bold text-neutral-900 tracking-wider">
+                    {formattedDate}
+                  </span>
+                </motion.div>
 
-            {/* Location */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30, scale: 0.95 }}
-              whileInView={{ opacity: 1, y: 0, scale: 1 }}
-              viewport={{ once: false, amount: 0.2 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              whileHover={{ scale: 1.03, y: -2 }}
-              className="flex flex-col items-center justify-center gap-1 bg-white/70 backdrop-blur-sm py-2.5 px-4 rounded-2xl border border-neutral-200/80 shadow-sm max-w-xs mx-auto"
-            >
-              <div className="flex items-center justify-center gap-3">
-                <img src={ASSETS.pinIcon} alt="Location Pin" className="w-6 h-6 object-contain" />
-                <span className="font-gaegu text-xl sm:text-2xl font-bold text-neutral-900 tracking-wider">
-                  {venueName}
-                </span>
+                {/* Time */}
+                <motion.div 
+                  initial={{ opacity: 0, x: 30, y: 20 }}
+                  whileInView={{ opacity: 1, x: 0, y: 0 }}
+                  viewport={{ once: false, amount: 0.2 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  whileHover={{ scale: 1.04, y: -2 }}
+                  className="flex items-center justify-center gap-3 bg-white/70 backdrop-blur-sm py-2 px-4 rounded-full border border-neutral-200/80 shadow-sm max-w-xs mx-auto"
+                >
+                  <img src={ASSETS.clockIcon} alt="Clock" className="w-6 h-6 object-contain" />
+                  <span className="font-gaegu text-xl sm:text-2xl font-bold text-neutral-900 tracking-wider">
+                    {formattedTime}
+                  </span>
+                </motion.div>
+
+                {/* Location */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 30, scale: 0.95 }}
+                  whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                  viewport={{ once: false, amount: 0.2 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  whileHover={{ scale: 1.03, y: -2 }}
+                  className="flex flex-col items-center justify-center gap-1 bg-white/70 backdrop-blur-sm py-2.5 px-4 rounded-2xl border border-neutral-200/80 shadow-sm max-w-xs mx-auto"
+                >
+                  <div className="flex items-center justify-center gap-3">
+                    <img src={ASSETS.pinIcon} alt="Location Pin" className="w-6 h-6 object-contain" />
+                    <span className="font-gaegu text-xl sm:text-2xl font-bold text-neutral-900 tracking-wider">
+                      {venueName}
+                    </span>
+                  </div>
+                  {venueAddress && (
+                    <p className="text-xs text-neutral-600 font-gaegu max-w-xs text-center mt-0.5">
+                      {venueAddress}
+                    </p>
+                  )}
+                </motion.div>
               </div>
-              {venueAddress && (
-                <p className="text-xs text-neutral-600 font-gaegu max-w-xs text-center mt-0.5">
-                  {venueAddress}
-                </p>
-              )}
-            </motion.div>
-          </div>
 
-          {/* Open Map Button */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20, scale: 0.9 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
-            viewport={{ once: false, amount: 0.2 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
-            className="pt-2 flex justify-center"
-          >
-            <motion.a
-              whileHover={{ scale: 1.06, y: -2 }}
-              whileTap={{ scale: 0.95 }}
-              href={mapsUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2.5 bg-neutral-900 text-white font-gaegu font-bold text-sm tracking-widest px-8 py-3 rounded-full hover:bg-neutral-800 transition-all shadow-md group"
-            >
-              <img src={ASSETS.pinIcon} alt="Pin" className="w-4 h-4 object-contain brightness-0 invert group-hover:animate-bounce" />
-              <span>OPEN MAP</span>
-            </motion.a>
-          </motion.div>
+              {/* Open Map Button */}
+              <motion.div 
+                initial={{ opacity: 0, y: 20, scale: 0.9 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: false, amount: 0.2 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="pt-2 flex justify-center"
+              >
+                <motion.a
+                  whileHover={{ scale: 1.06, y: -2 }}
+                  whileTap={{ scale: 0.95 }}
+                  href={mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2.5 bg-neutral-900 text-white font-gaegu font-bold text-sm tracking-widest px-8 py-3 rounded-full hover:bg-neutral-800 transition-all shadow-md group"
+                >
+                  <img src={ASSETS.pinIcon} alt="Pin" className="w-4 h-4 object-contain brightness-0 invert group-hover:animate-bounce" />
+                  <span>OPEN MAP</span>
+                </motion.a>
+              </motion.div>
+            </>
+          )}
         </motion.section>
 
 
