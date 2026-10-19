@@ -1298,7 +1298,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                   const bankName = acc.provider || acc.bank_name || "BANK BCA";
                   const accNum = acc.account_number || "";
                   const ownerName = acc.account_name || acc.owner_name || (idx === 0 ? brideFull : groomFull);
-                  const nick = idx === 0 ? (brideBank.nickname || brideNickname) : (groomBank.nickname || groomNickname);
+                  const nick = idx === 0 ? (brideBank.nickname || brideNickname) : (idx === 1 ? (groomBank.nickname || groomNickname) : (acc.account_name || `Rekening #${idx + 1}`));
 
                   return (
                     <motion.div 
