@@ -210,26 +210,22 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
 
   // Story Milestones
-  const dbStories = (project as any)?.love_story_items || (project as any)?.wedding_stories;
-  const stories = Array.isArray(dbStories) && dbStories.length > 0
-    ? dbStories
-    : [
-        {
-          year: "2019",
-          title: "First Meet",
-          story: "Berawal dari perkenalan singkat di sebuah kafe hingga berlanjut ke pertemuan berikutnya.",
-        },
-        {
-          year: "2020",
-          title: "The Spark",
-          story: "Mulai menyadari dan merasakan adanya rasa yang berbeda di antara keduanya.",
-        },
-        {
-          year: "2024",
-          title: "The Proposal",
-          story: "Di tempat yang tenang dan penuh makna, sebuah janji terucap untuk melangkah bersama selamanya.",
-        },
-      ];
+  const rawDbStories = (project as any)?.love_story_items || (project as any)?.wedding_stories;
+  let dbStories: any[] = [];
+  try {
+    if (Array.isArray(rawDbStories)) {
+      dbStories = rawDbStories;
+    } else if (typeof rawDbStories === "string") {
+      dbStories = JSON.parse(rawDbStories);
+    }
+  } catch {}
+
+  const hasLoveStory = Boolean(
+    (Array.isArray(dbStories) && dbStories.length > 0) ||
+    ((project as any)?.love_story && typeof (project as any)?.love_story === "string" && (project as any).love_story.trim().length > 0)
+  );
+
+  const stories = Array.isArray(dbStories) && dbStories.length > 0 ? dbStories : [];
 
   // Cashless feature check:
   const isCashlessEnabled = Boolean(
@@ -1142,7 +1138,8 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         </motion.section>
 
         {/* 3. OUR STORY SECTION */}
-        <motion.section 
+        {hasLoveStory && (
+          <motion.section 
           initial={{ opacity: 0, y: 40, scale: 0.96 }}
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: false, amount: 0.15, margin: "-30px" }}
@@ -1263,6 +1260,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             </div>
           </div>
         </motion.section>
+        )}
 
         {/* 4. DRESS CODE SECTION */}
         {hasDresscode && (
