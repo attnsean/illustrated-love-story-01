@@ -28,6 +28,86 @@ const formatHonorific = (name?: string | null, prefix: string = "") => {
   return `${prefix} ${trimmed}`;
 };
 
+
+interface AnimatedLine {
+  text: string;
+  className?: string;
+  accentChar?: string;
+  accentClassName?: string;
+}
+
+interface ScrollAnimatedTitleProps {
+  lines: (string | AnimatedLine)[];
+  className?: string;
+}
+
+const scrollTitleContainerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.04,
+      delayChildren: 0.05,
+    },
+  },
+};
+
+const scrollCharVariants = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+    scale: 0.82,
+    rotate: -4,
+    transition: { duration: 0.25, ease: 'easeIn' as const },
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    rotate: 0,
+    transition: {
+      type: 'spring' as const,
+      damping: 12,
+      stiffness: 140,
+    },
+  },
+};
+
+function ScrollAnimatedTitle({ lines, className = '' }: ScrollAnimatedTitleProps) {
+  return (
+    <motion.div
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: false, amount: 0.3 }}
+      variants={scrollTitleContainerVariants}
+      whileHover={{ scale: 1.04 }}
+      transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+      className={`flex flex-col items-center justify-center select-none py-1 cursor-default ${className}`}
+    >
+      {lines.map((lineItem, lIdx) => {
+        const item: AnimatedLine = typeof lineItem === 'string' ? { text: lineItem } : lineItem;
+        const chars = Array.from(item.text);
+        return (
+          <div key={lIdx} className={`flex items-center justify-center leading-none ${item.className || ''}`}>
+            {chars.map((char, cIdx) => {
+              const isAccent = item.accentChar && char === item.accentChar;
+              return (
+                <motion.span
+                  key={cIdx}
+                  variants={scrollCharVariants}
+                  className={`inline-block ${isAccent ? (item.accentClassName || 'text-red-600') : ''}`}
+                >
+                  {char === ' ' ? '\u00A0' : char}
+                </motion.span>
+              );
+            })}
+          </div>
+        );
+      })}
+    </motion.div>
+  );
+}
+
 export default function RightSidebar({ guestName, guest, project, events, wishes: initialWishes, stats, existingRsvp }: Props) {
   // Couple Info
   const brideNickname = project?.bride_nickname || "Natalie";
@@ -210,6 +290,14 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
     existingRsvp ? { status: existingRsvp.attendance || "attending", pax: existingRsvp.pax || 1 } : null
   );
   const [isOpened, setIsOpened] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('open') === 'true') {
+        setIsOpened(true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!isOpened) {
@@ -705,11 +793,13 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
           </p>
 
           <div className="flex justify-center">
-            <motion.img 
-              whileHover={{ scale: 1.05 }}
-              src={ASSETS.titleDatePlace} 
-              alt="Date & Place" 
-              className="w-36 h-auto object-contain select-none pointer-events-none" 
+            <ScrollAnimatedTitle
+              lines={[
+                { text: "Date", className: "text-neutral-900" },
+                { text: "&", className: "text-red-600 text-3xl sm:text-4xl -my-1" },
+                { text: "Place", className: "text-neutral-900" },
+              ]}
+              className="font-melody text-5xl sm:text-6xl"
             />
           </div>
 
@@ -784,11 +874,12 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
           </p>
 
           <div className="flex justify-center">
-            <motion.img 
-              whileHover={{ scale: 1.05 }}
-              src={ASSETS.titleOurStory} 
-              alt="Our Story" 
-              className="w-36 h-auto object-contain select-none pointer-events-none" 
+            <ScrollAnimatedTitle
+              lines={[
+                { text: "Our", className: "text-neutral-900" },
+                { text: "Story", className: "text-neutral-900 mt-1" },
+              ]}
+              className="font-melody text-5xl sm:text-6xl"
             />
           </div>
 
@@ -888,11 +979,12 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             </p>
 
             <div className="flex justify-center">
-              <motion.img 
-                whileHover={{ scale: 1.05 }}
-                src={ASSETS.titleDressCode} 
-                alt="Dress Code" 
-                className="w-36 h-auto object-contain select-none pointer-events-none" 
+              <ScrollAnimatedTitle
+                lines={[
+                  { text: "Dress", className: "text-neutral-900" },
+                  { text: "Code", className: "text-neutral-900 mt-1" },
+                ]}
+                className="font-melody text-5xl sm:text-6xl"
               />
             </div>
 
@@ -938,9 +1030,13 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="text-center space-y-4 pt-4">
           <div className="flex justify-center mb-2">
-            <h3 className="font-gaegu font-bold text-5xl sm:text-6xl text-neutral-900 leading-tight">
-              Wedding <br /> Gift
-            </h3>
+            <ScrollAnimatedTitle
+              lines={[
+                { text: "Wedding", className: "text-neutral-900" },
+                { text: "Gift", className: "text-neutral-900 mt-1" },
+              ]}
+              className="font-melody text-5xl sm:text-6xl"
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3 pt-3">
@@ -1004,10 +1100,11 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
           {/* RSVP Script Title (01-15.png) */}
           <div className="flex justify-center">
-            <img 
-              src={ASSETS.titleRsvp} 
-              alt="RSVP" 
-              className="w-36 h-auto object-contain select-none pointer-events-none" 
+            <ScrollAnimatedTitle
+              lines={[
+                { text: "RSVP", className: "text-neutral-900 tracking-wider" },
+              ]}
+              className="font-melody text-6xl sm:text-7xl"
             />
           </div>
 
@@ -1112,11 +1209,11 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
           </p>
 
           <div className="flex justify-center">
-            <motion.img 
-              whileHover={{ scale: 1.05 }}
-              src={ASSETS.titleAttendance} 
-              alt="Attendance" 
-              className="w-40 h-auto object-contain select-none pointer-events-none" 
+            <ScrollAnimatedTitle
+              lines={[
+                { text: "Attendance", className: "text-neutral-900" },
+              ]}
+              className="font-melody text-5xl sm:text-6xl"
             />
           </div>
 
@@ -1252,13 +1349,9 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   disabled={rsvpSubmitting}
-                  className="relative group select-none"
+                  className="inline-flex items-center justify-center px-8 py-3 bg-[#1e1b18] hover:bg-neutral-900 text-white font-gaegu font-bold text-sm sm:text-base tracking-widest rounded-full shadow-md transition-all uppercase select-none disabled:opacity-60"
                 >
-                  <img 
-                    src={ASSETS.btnConfirmPresence} 
-                    alt="Confirm Presence" 
-                    className="w-44 h-auto object-contain drop-shadow-sm group-hover:drop-shadow-md transition-all" 
-                  />
+                  {rsvpSubmitting ? "Menyimpan..." : "CONFIRM PRESENCE"}
                 </motion.button>
               </div>
 
@@ -1288,11 +1381,11 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
           </p>
 
           <div className="flex justify-center">
-            <motion.img 
-              whileHover={{ scale: 1.05 }}
-              src={ASSETS.titleBlessings} 
-              alt="Blessings & Wishes" 
-              className="w-44 h-auto object-contain select-none pointer-events-none" 
+            <ScrollAnimatedTitle
+              lines={[
+                { text: "Blessings", className: "text-neutral-900" },
+              ]}
+              className="font-melody text-5xl sm:text-6xl"
             />
           </div>
 
@@ -1334,13 +1427,9 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 disabled={wishSubmitting}
-                className="relative group select-none"
+                className="inline-flex items-center justify-center px-8 py-3 bg-[#1e1b18] hover:bg-neutral-900 text-white font-gaegu font-bold text-sm sm:text-base tracking-widest rounded-full shadow-md transition-all uppercase select-none disabled:opacity-60"
               >
-                <img 
-                  src={ASSETS.btnSubmitBlessing} 
-                  alt="Submit Blessing" 
-                  className="w-44 h-auto object-contain drop-shadow-sm group-hover:drop-shadow-md transition-all" 
-                />
+                {wishSubmitting ? "Mengirim..." : "SUBMIT BLESSING"}
               </motion.button>
             </div>
 
