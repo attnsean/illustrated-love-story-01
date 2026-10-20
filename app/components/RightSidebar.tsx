@@ -146,16 +146,33 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   };
   const formattedDate = formatDateDisplay(weddingDateRaw);
 
+  const formatEventTimeDisplay = (timeStr?: string | null, endTimeStr?: string | null) => {
+    if (!timeStr || !timeStr.trim()) return "15:00 WIB";
+    const trimmed = timeStr.trim();
+    if (/WIB|WITA|WIT|selesai|-/i.test(trimmed)) {
+      return trimmed;
+    }
+    const cleanTime = trimmed.includes(".") ? trimmed.replace(".", ":") : trimmed;
+    const base = cleanTime.length >= 5 ? cleanTime.slice(0, 5) : cleanTime;
+    if (endTimeStr && endTimeStr.trim()) {
+      const endTrimmed = endTimeStr.trim();
+      const endClean = endTrimmed.includes(".") ? endTrimmed.replace(".", ":") : endTrimmed;
+      const endBase = endClean.length >= 5 ? endClean.slice(0, 5) : endClean;
+      return `${base} - ${endBase} WIB`;
+    }
+    return `${base} WIB`;
+  };
+
   const extractTime = () => {
     if (mainEvent?.event_time) {
-      return `${mainEvent.event_time.slice(0, 5)} WIB`;
+      return formatEventTimeDisplay(mainEvent.event_time, mainEvent.end_time);
     }
     if ((project as any)?.wedding_time) {
-      return `${(project as any).wedding_time.slice(0, 5)} WIB`;
+      return formatEventTimeDisplay((project as any).wedding_time);
     }
     if (project?.countdown_target && project.countdown_target.includes("T")) {
-      const timePart = project.countdown_target.split("T")[1]?.slice(0, 5);
-      if (timePart) return `${timePart} WIB`;
+      const timePart = project.countdown_target.split("T")[1];
+      if (timePart) return formatEventTimeDisplay(timePart);
     }
     return "15:00 WIB";
   };
@@ -177,11 +194,14 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
       }
       const dateStr = weddingDateRaw || "2028-02-28";
       let timeStr = "15:00:00";
-      if (mainEvent?.event_time) {
-        timeStr = mainEvent.event_time.length === 5 ? mainEvent.event_time + ":00" : mainEvent.event_time;
-      } else if ((project as any)?.wedding_time) {
-        const wt = (project as any).wedding_time;
-        timeStr = wt.length === 5 ? wt + ":00" : wt;
+      const rawT = mainEvent?.event_time || (project as any)?.wedding_time;
+      if (rawT && typeof rawT === "string") {
+        const match = rawT.match(/(\d{1,2})[:.](\d{2})/);
+        if (match) {
+          timeStr = `${match[1].padStart(2, "0")}:${match[2]}:00`;
+        } else if (rawT.length === 5) {
+          timeStr = rawT + ":00";
+        }
       }
       const isoStr = dateStr + "T" + timeStr;
       const parsed = new Date(isoStr).getTime();
@@ -911,7 +931,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                   `Sesi Acara #${idx + 1}`
                 );
                 const evtDate = formatDateDisplay(evt.event_date || weddingDateRaw);
-                const evtTime = evt.event_time ? `${evt.event_time.slice(0, 5)}${evt.end_time ? ` - ${evt.end_time.slice(0, 5)}` : ""} WIB` : formattedTime;
+                const evtTime = evt.event_time ? formatEventTimeDisplay(evt.event_time, evt.end_time) : formattedTime;
                 const evtVenue = evt.venue_name || venueName;
                 const evtAddr = evt.venue_address || "";
                 const evtMaps = evt.venue_maps_url || mapsUrl;
