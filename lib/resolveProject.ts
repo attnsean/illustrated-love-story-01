@@ -298,11 +298,12 @@ export async function resolveProjectData(slug?: string, host?: string, guestName
         // 6. Fetch RSVP attendance stats (attending sum)
         const { data: rsvpData } = await supabase
           .from('rsvp')
-          .select('pax')
-          .eq('project_id', projectId)
-          .eq('attendance', 'hadir');
+          .select('pax, attendance')
+          .eq('project_id', projectId);
 
-        const totalAttending = rsvpData?.reduce((acc, curr) => acc + (curr.pax || 1), 0) || 0;
+        const totalAttending = rsvpData
+          ?.filter(r => r.attendance === 'hadir' || r.attendance === 'attending')
+          ?.reduce((acc, curr) => acc + (curr.pax || 1), 0) || 0;
 
         result.stats = {
           attending: totalAttending > 0 ? totalAttending : 156, // fallback to mock UI default if 0

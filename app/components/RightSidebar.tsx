@@ -359,13 +359,15 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
   const dresscodeColors = parseDresscodeColors();
 
+  const isDeclined = (status?: string | null) => status === "not_attending" || status === "tidak_hadir";
+
   const [willBeThere, setWillBeThere] = useState<"yes" | "no" | null>(
-    existingRsvp ? (existingRsvp.attendance === "not_attending" ? "no" : "yes") : "yes"
+    existingRsvp ? (isDeclined(existingRsvp.attendance) ? "no" : "yes") : "yes"
   );
   const [rsvpName, setRsvpName] = useState(isGuestLocked ? guestName : "");
   const [rsvpEmail, setRsvpEmail] = useState(guest?.email || "");
   const [rsvpStatus, setRsvpStatus] = useState<string>(
-    existingRsvp ? (existingRsvp.attendance === "not_attending" ? "not_attending" : "attending") : "attending"
+    existingRsvp ? (isDeclined(existingRsvp.attendance) ? "not_attending" : "attending") : "attending"
   );
   const [guestCount, setGuestCount] = useState<number>(existingRsvp?.pax || 1);
   const [rsvpNotes, setRsvpNotes] = useState<string>("");
@@ -493,8 +495,8 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
           name: rsvpName,
           guest_name: rsvpName,
           email: rsvpEmail,
-          status: rsvpStatus,
-          attendance: rsvpStatus === "attending" ? "attending" : "not_attending",
+          status: rsvpStatus === "attending" ? "hadir" : "tidak_hadir",
+          attendance: rsvpStatus === "attending" ? "hadir" : "tidak_hadir",
           pax: guestCount,
           guests_count: guestCount,
           notes: rsvpNotes,

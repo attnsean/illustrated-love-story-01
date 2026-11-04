@@ -204,7 +204,7 @@ export default function BlessingWall({
               hasRsvp = true;
               const rsvpRecord = byIdData[0];
               if (rsvpRecord.guest_phone) setPhone(rsvpRecord.guest_phone);
-              if (rsvpRecord.attendance) setIsAttending(rsvpRecord.attendance === 'hadir' ? 'yes' : 'no');
+              if (rsvpRecord.attendance) setIsAttending(rsvpRecord.attendance === 'hadir' || rsvpRecord.attendance === 'attending' ? 'yes' : 'no');
               if (rsvpRecord.pax) setGuestsCount(rsvpRecord.pax);
             }
           }
@@ -222,7 +222,7 @@ export default function BlessingWall({
               hasRsvp = true;
               const rsvpRecord = byNameData[0];
               if (rsvpRecord.guest_phone) setPhone(rsvpRecord.guest_phone);
-              if (rsvpRecord.attendance) setIsAttending(rsvpRecord.attendance === 'hadir' ? 'yes' : 'no');
+              if (rsvpRecord.attendance) setIsAttending(rsvpRecord.attendance === 'hadir' || rsvpRecord.attendance === 'attending' ? 'yes' : 'no');
               if (rsvpRecord.pax) setGuestsCount(rsvpRecord.pax);
             }
           }
