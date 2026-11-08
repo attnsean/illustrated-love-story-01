@@ -1082,8 +1082,9 @@ export default function RSVPDashboard() {
       } else if (checkoutModal.type === 'quota') {
         const count = checkoutModal.data.count;
         setWaBlastExtraQuota(prev => prev + count);
-        await syncBlastConfigToSupabase({ add_extra_wa_blast: count });
-        alert(`Klaim Kupon Berhasil!\n\nBerhasil menambahkan ${count} kuota WA Blast.`);
+        setHasWABlast(true);
+        await syncBlastConfigToSupabase({ add_extra_wa_blast: count, has_wa_blast: true });
+        alert(`Klaim Kupon Berhasil!\n\nBerhasil menambahkan ${count} kuota WA Blast dan fitur WA Blast telah aktif.`);
       } else if (checkoutModal.type === 'dashboard') {
         setHasDashboardFeature(true);
         await syncBlastConfigToSupabase({ has_dashboard: true });
@@ -1959,9 +1960,11 @@ export default function RSVPDashboard() {
               setActiveTab('blast');
             }
 
-            const resolvedHasBlast = storedConfig?.has_wa_blast !== undefined 
-              ? Boolean(storedConfig.has_wa_blast) 
-              : bundleConfig.has_wa_blast;
+            const resolvedHasBlast = Boolean(
+              storedConfig?.has_wa_blast ||
+              (typeof storedConfig?.extra_wa_blast === "number" && storedConfig.extra_wa_blast > 0) ||
+              bundleConfig.has_wa_blast
+            );
             setHasWABlast(resolvedHasBlast);
 
             const resolvedMaxBlast = typeof storedConfig?.max_wa_blast === 'number'
@@ -3541,11 +3544,11 @@ export default function RSVPDashboard() {
                 <div className="relative grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 p-5 sm:p-8 md:p-10 items-center">
                   {/* Left: Copy & CTA */}
                   <div className="md:col-span-7 space-y-5">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] sm:text-[11px] font-bold uppercase tracking-wider">
+                      <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
-                      <span>Belum Tersedia di Paket {BUNDLE_WA_BLAST_CONFIG[projectPackageName?.toLowerCase()]?.label || 'Anda'}</span>
+                      <span>Tersedia untuk Paket {BUNDLE_WA_BLAST_CONFIG[projectPackageName?.toLowerCase()]?.label || 'Basic'}: Beli Kuota atau Upgrade</span>
                     </div>
 
                     <div className="space-y-2">
@@ -3553,18 +3556,29 @@ export default function RSVPDashboard() {
                         Sebar Undangan ke Semua Tamu, <span className="text-emerald-700">Sekali Klik.</span>
                       </h2>
                       <p className="text-sm text-neutral-500 leading-relaxed max-w-lg">
-                        Kirim undangan pernikahan langsung ke WhatsApp setiap tamu secara otomatis, lengkap dengan nama dan link undangan pribadi masing-masing. Tidak perlu lagi kirim satu per satu.
+                        Kirim undangan pernikahan langsung ke WhatsApp setiap tamu secara otomatis, lengkap dengan nama dan link undangan pribadi masing-masing. Di paket Basic, Anda dapat langsung membeli kuota pesan WA Blast terpisah tanpa harus upgrade paket bundle!
                       </p>
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
                       <button
                         type="button"
-                        id="wa-blast-locked-upgrade-btn"
-                        onClick={() => setShowUpgradeBundleModal(true)}
+                        id="wa-blast-locked-buy-quota-btn"
+                        onClick={() => setShowBuyQuotaModal(true)}
                         className="w-full sm:w-auto px-6 py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white text-[11px] font-bold uppercase tracking-[0.15em] rounded-2xl transition-all shadow-lg shadow-emerald-600/20 active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
                       >
-                        <span>Aktifkan WA Blast</span>
+                        <span>Beli Kuota WA Blast</span>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M12 4v16m8-8H4" />
+                        </svg>
+                      </button>
+                      <button
+                        type="button"
+                        id="wa-blast-locked-upgrade-btn"
+                        onClick={() => setShowUpgradeBundleModal(true)}
+                        className="w-full sm:w-auto px-6 py-3.5 bg-neutral-900 hover:bg-neutral-800 text-white text-[11px] font-bold uppercase tracking-[0.15em] rounded-2xl transition-all shadow-md active:scale-[0.98] cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        <span>Upgrade Paket Bundle</span>
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                         </svg>
@@ -3654,11 +3668,72 @@ export default function RSVPDashboard() {
                 ))}
               </div>
 
-              {/* Package Picker */}
+              {/* Opsi 1: Beli Kuota WA Blast Saja (Tanpa Ganti Paket) */}
+              <div className="bg-white p-5 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border border-emerald-200 shadow-[0_4px_25px_rgba(16,185,129,0.08)] space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-[10px] font-bold uppercase tracking-wider border border-emerald-200">
+                      ⚡ Tanpa Harus Upgrade Paket Bundle
+                    </span>
+                    <h3 className="text-lg sm:text-xl font-serif font-bold text-neutral-900 mt-1.5">
+                      Beli Kuota WA Blast Saja
+                    </h3>
+                    <p className="text-xs text-neutral-500 mt-0.5">
+                      Tetap di Paket Basic, langsung beli kuota pesan sesuai kebutuhan Anda tanpa harus upgrade bundle.
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3.5 py-1.5 rounded-xl border border-emerald-200 self-start sm:self-auto shrink-0">
+                    Mulai Rp 25.000
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                  {[
+                    { count: 100, priceNum: 25000, price: 'Rp 25.000', label: '+100 Pesan', desc: 'Cocok untuk pernikahan intim', popular: false },
+                    { count: 250, priceNum: 50000, price: 'Rp 50.000', label: '+250 Pesan', desc: 'Rekomendasi resepsi standar', popular: true },
+                    { count: 500, priceNum: 85000, price: 'Rp 85.000', label: '+500 Pesan', desc: 'Hemat 30% • Kapasitas besar', popular: false },
+                  ].map((q) => (
+                    <button
+                      key={q.count}
+                      type="button"
+                      id={`wa-blast-direct-quota-${q.count}`}
+                      onClick={() => openQuotaCheckout(q.count, q.price, q.priceNum)}
+                      className={`relative text-left p-5 rounded-2xl border transition-all cursor-pointer group active:scale-[0.99] ${
+                        q.popular
+                          ? 'border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/40 hover:bg-emerald-50 shadow-md'
+                          : 'border-neutral-200 bg-white hover:border-emerald-500 hover:shadow-md'
+                      }`}
+                    >
+                      {q.popular && (
+                        <span className="absolute -top-2.5 left-5 px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-bold uppercase tracking-wider shadow-sm">
+                          Paling Populer
+                        </span>
+                      )}
+                      <p className="text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">Top Up Kuota</p>
+                      <h4 className="text-lg font-serif font-bold text-neutral-900 mt-0.5">{q.label}</h4>
+                      <div className="flex items-baseline gap-1 mt-2">
+                        <span className="text-2xl font-serif font-bold text-emerald-700">{q.price}</span>
+                      </div>
+                      <p className="text-[11px] text-neutral-500 mt-1">{q.desc}</p>
+                      <div className="mt-4 pt-3 border-t border-neutral-100 flex items-center justify-between">
+                        <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Beli Kuota Ini</span>
+                        <svg className="w-4 h-4 text-emerald-700 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.2} d="M9 5l7 7-7 7" />
+                        </svg>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Opsi 2: Atau Upgrade Paket Bundle */}
               <div className="bg-white p-5 sm:p-8 rounded-3xl sm:rounded-[2.5rem] border border-neutral-100 shadow-[0_4px_20px_rgba(0,0,0,0.03)] space-y-5">
                 <div className="text-center space-y-1">
-                  <span className="text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">Pilih Paket</span>
-                  <h3 className="text-lg sm:text-xl font-serif font-bold text-neutral-900">Upgrade untuk Membuka WA Blast</h3>
+                  <span className="text-[10px] font-bold tracking-[0.2em] text-neutral-400 uppercase">Opsi Alternatif</span>
+                  <h3 className="text-lg sm:text-xl font-serif font-bold text-neutral-900">Atau Upgrade ke Paket Bundle</h3>
+                  <p className="text-xs text-neutral-500">
+                    Dapatkan kuota pesan bawaan sekaligus fitur bebas watermark promosi dan benefit lainnya.
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
