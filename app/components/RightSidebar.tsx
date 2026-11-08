@@ -1237,7 +1237,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                           <h4 className="font-gaegu font-bold text-base text-neutral-900 leading-tight">
                             {item.title}
                           </h4>
-                          <p className="font-gaegu font-light text-xs text-neutral-600 leading-relaxed mt-0.5">
+                          <p className="font-gaegu font-light text-xs text-neutral-600 leading-relaxed mt-0.5 whitespace-pre-line">
                             {item.story || item.desc || item.description}
                           </p>
                         </div>
@@ -1280,7 +1280,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                           <h4 className="font-gaegu font-bold text-base text-neutral-900 leading-tight">
                             {item.title}
                           </h4>
-                          <p className="font-gaegu font-light text-xs text-neutral-600 leading-relaxed mt-0.5">
+                          <p className="font-gaegu font-light text-xs text-neutral-600 leading-relaxed mt-0.5 whitespace-pre-line">
                             {item.story || item.desc || item.description}
                           </p>
                         </div>
