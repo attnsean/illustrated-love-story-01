@@ -62,7 +62,8 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
   const title = `Wedding Invitation for ${guestName} | ${groomName} & ${brideName}`;
   const description = `We cordially invite ${guestName} to share our special day. The wedding celebration of ${groomFull} & ${brideFull}.`;
-  const imageUrl = dbData.project?.cover_photo_url || dbData.project?.opening_photo_url || ASSETS.couple;
+  const rawCover = dbData.project?.cover_photo_url || dbData.project?.opening_photo_url;
+  const imageUrl = (rawCover && !rawCover.includes("/defaults") && !rawCover.includes("onyx")) ? rawCover : 'https://cdn.serastory.com/templates/covers/illustrated-01-cover.jpg';
 
   return {
     title,

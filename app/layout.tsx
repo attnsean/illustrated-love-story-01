@@ -33,7 +33,7 @@ const customScript = Great_Vibes({
 import { supabase } from "../lib/supabase";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || 'a99bab7e-6ed3-48f5-bc1d-23f134794f20';
+  const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || '1bf6f05c-f64a-40c9-b67a-490b52289bd4';
   
   const { data: projectData } = await supabase
     .from('projects')
@@ -56,8 +56,9 @@ export async function generateMetadata(): Promise<Metadata> {
   const groomName = data?.groom_name || "Groom";
   const brideNick = data?.bride_nickname || "Bride";
   const groomNick = data?.groom_nickname || "Groom";
-  const coverUrl = data?.cover_photo_url || data?.opening_photo_url || '/opengraph-image.jpg';
-  const siteUrl = data?.custom_domain || data?.site_url || process.env.NEXT_PUBLIC_SITE_URL || 'https://serastory.com';
+  const rawCover = data?.cover_photo_url || data?.opening_photo_url;
+  const coverUrl = (rawCover && !rawCover.includes("/defaults") && !rawCover.includes("onyx")) ? rawCover : 'https://cdn.serastory.com/templates/covers/illustrated-01-cover.jpg';
+  const siteUrl = data?.custom_domain || data?.site_url || 'https://illustrated-love-story-01.serastory.com';
 
   const title = `${brideName.toUpperCase()} & ${groomName.toUpperCase()} Wedding Invitation`;
   const description = `The wedding celebration of ${brideName} & ${groomName}`;
