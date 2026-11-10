@@ -24,7 +24,7 @@ interface Props {
 const formatHonorific = (name?: string | null, prefix: string = "") => {
   if (!name || !name.trim()) return "";
   const trimmed = name.trim();
-  if (/^(bpk\.?|bapak|ibu)/i.test(trimmed)) return trimmed;
+  if (/^(bpk\.?|bapak|ibu|alm\.?|almarhum|almarhumah)/i.test(trimmed)) return trimmed;
   return `${prefix} ${trimmed}`;
 };
 
@@ -120,10 +120,11 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   const defaultGroomFather = "Bpk. Robert Alexander";
   const defaultGroomMother = "Ibu Sarah Alexander";
 
-  const brideFather = (project as any)?.bride_father || defaultBrideFather;
-  const brideMother = (project as any)?.bride_mother || defaultBrideMother;
-  const groomFather = (project as any)?.groom_father || defaultGroomFather;
-  const groomMother = (project as any)?.groom_mother || defaultGroomMother;
+  const isDemo = !project || (!project.id && !project.project_name);
+  const brideFather = isDemo ? defaultBrideFather : ((project as any)?.bride_father?.trim() || "");
+  const brideMother = isDemo ? defaultBrideMother : ((project as any)?.bride_mother?.trim() || "");
+  const groomFather = isDemo ? defaultGroomFather : ((project as any)?.groom_father?.trim() || "");
+  const groomMother = isDemo ? defaultGroomMother : ((project as any)?.groom_mother?.trim() || "");
 
   // Event Info
   const mainEvent = events && events.length > 0 ? events[0] : null;
