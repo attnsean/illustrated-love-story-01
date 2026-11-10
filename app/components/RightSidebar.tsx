@@ -452,6 +452,34 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const userPausedRef = useRef(false);
 
+  // Gallery Photos State & Lightbox
+  const galleryPhotosList: string[] = React.useMemo(() => {
+    if (!project?.gallery_photos) return [];
+    if (Array.isArray(project.gallery_photos)) {
+      return project.gallery_photos
+        .map((p: any) => (typeof p === "string" ? p : p?.url || p?.public_url))
+        .filter((u: any): u is string => typeof u === "string" && u.trim().length > 0 && !isDefaultStorageUrl(u));
+    }
+    return [];
+  }, [project?.gallery_photos]);
+
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (selectedPhotoIndex === null) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedPhotoIndex(null);
+      if (e.key === "ArrowLeft") {
+        setSelectedPhotoIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : galleryPhotosList.length - 1));
+      }
+      if (e.key === "ArrowRight") {
+        setSelectedPhotoIndex((prev) => (prev !== null && prev < galleryPhotosList.length - 1 ? prev + 1 : 0));
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedPhotoIndex, galleryPhotosList.length]);
+
   useEffect(() => {
     const handleFirstClick = () => {
       if (userPausedRef.current) return;
@@ -1295,6 +1323,105 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         </motion.section>
         )}
 
+                {/* PHOTO GALLERY SECTION */}
+        {galleryPhotosList.length > 0 && (
+          <motion.section 
+            id="gallery-section"
+            initial={{ opacity: 0, y: 40, scale: 0.96 }}
+            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            viewport={{ once: false, amount: 0.15, margin: "-30px" }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+            className="text-center space-y-4 pt-2"
+          >
+            {/* Camera doodle badge */}
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: false, amount: 0.2 }}
+              transition={{ duration: 0.5 }}
+              className="flex justify-center"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-white border-2 border-neutral-900 shadow-[0_4px_0_0_#171717] flex items-center justify-center rotate-[-3deg] hover:rotate-0 transition-transform">
+                <svg className="w-6 h-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+            </motion.div>
+
+            {/* Hand-drawn Animated Title */}
+            <div className="flex justify-center">
+              <ScrollAnimatedTitle lines={["OUR SWEET MOMENTS", "PHOTO GALLERY"]} />
+            </div>
+
+            <motion.p 
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false, amount: 0.2 }}
+              transition={{ duration: 0.5 }}
+              className="text-xs sm:text-sm font-gaegu text-neutral-600 px-6 tracking-wide leading-relaxed font-bold"
+            >
+              Setiap senyuman, tawa, dan tatapan mata yang mengabadikan perjalanan indah kami menuju hari bahagia.
+            </motion.p>
+
+            {/* Gallery Grid (Scrapbook / Polaroid Style with Washi Tape) */}
+            <div className="grid grid-cols-2 gap-3.5 sm:gap-4 pt-3 px-1">
+              {galleryPhotosList.map((photoUrl, idx) => {
+                const rotations = ["rotate-[-2deg]", "rotate-[2deg]", "rotate-[-1.5deg]", "rotate-[1.5deg]", "rotate-[-1deg]", "rotate-[2.5deg]"];
+                const rot = rotations[idx % rotations.length];
+                return (
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 25, scale: 0.92 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                    viewport={{ once: false, amount: 0.15 }}
+                    transition={{ duration: 0.5, delay: (idx % 4) * 0.08 }}
+                    whileHover={{ scale: 1.04, rotate: 0 }}
+                    onClick={() => setSelectedPhotoIndex(idx)}
+                    className={`group relative bg-white p-2 sm:p-2.5 pb-4 sm:pb-5 rounded-2xl border-2 border-neutral-900 shadow-[0_5px_0_0_#171717] cursor-pointer transition-all duration-300 ${rot}`}
+                  >
+                    {/* Washi Tape Header */}
+                    <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 w-12 sm:w-14 h-4 bg-amber-100/90 border border-amber-300/80 rounded-xs shadow-xs rotate-[-1.5deg] z-10 pointer-events-none backdrop-blur-xs flex items-center justify-center">
+                      <span className="w-8 h-[1px] bg-amber-300/40" />
+                    </div>
+
+                    {/* Image Frame */}
+                    <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200/80">
+                      <Image
+                        src={photoUrl}
+                        alt={`Photo Moment ${idx + 1}`}
+                        fill
+                        sizes="(max-width: 640px) 45vw, 220px"
+                        className="object-cover transition-transform duration-500 group-hover:scale-108"
+                      />
+                      {/* Subtle hover overlay with zoom icon */}
+                      <div className="absolute inset-0 bg-neutral-950/25 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-full bg-white/90 text-neutral-900 flex items-center justify-center shadow-md transform scale-75 group-hover:scale-100 transition-transform">
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Bottom Polaroid label */}
+                    <div className="pt-2 text-center">
+                      <span className="text-[11px] font-gaegu font-bold text-neutral-500 tracking-wider">
+                        Moment #${String(idx + 1).padStart(2, "0")}
+                      </span>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+
+            {/* Hint text */}
+            <p className="text-[10px] font-gaegu text-neutral-400 italic pt-1">
+              *Klik foto untuk melihat dalam ukuran penuh
+            </p>
+          </motion.section>
+        )}
+
         {/* 4. DRESS CODE SECTION */}
         {hasDresscode && (
           <motion.section 
@@ -2031,6 +2158,86 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         </motion.footer>
 
       </div>
+
+      {/* FULL-SCREEN PHOTO LIGHTBOX MODAL */}
+      <AnimatePresence>
+        {selectedPhotoIndex !== null && galleryPhotosList[selectedPhotoIndex] && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-neutral-950/90 backdrop-blur-md cursor-zoom-out select-none"
+            onClick={() => setSelectedPhotoIndex(null)}
+          >
+            {/* Modal Card */}
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.85, opacity: 0, y: 20 }}
+              transition={{ type: "spring", stiffness: 350, damping: 28 }}
+              className="relative max-w-lg w-full max-h-[92vh] bg-white rounded-3xl border-3 border-neutral-900 p-3 sm:p-4 shadow-2xl flex flex-col items-center cursor-default"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setSelectedPhotoIndex(null)}
+                className="absolute -top-3 -right-3 w-9 h-9 rounded-full bg-red-500 text-white border-2 border-neutral-900 shadow-[0_3px_0_0_#171717] flex items-center justify-center hover:bg-red-600 active:scale-95 transition-all z-20 cursor-pointer"
+                aria-label="Close"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              {/* Photo Display */}
+              <div className="relative w-full aspect-[4/5] max-h-[72vh] rounded-2xl overflow-hidden bg-neutral-100 border border-neutral-200">
+                <Image
+                  src={galleryPhotosList[selectedPhotoIndex]}
+                  alt={`Gallery Photo ${selectedPhotoIndex + 1}`}
+                  fill
+                  priority
+                  sizes="(max-width: 640px) 90vw, 500px"
+                  className="object-contain"
+                />
+              </div>
+
+              {/* Navigation Bar below Photo */}
+              <div className="w-full flex items-center justify-between pt-3 px-2">
+                {/* Prev Button */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedPhotoIndex((prev) => (prev !== null && prev > 0 ? prev - 1 : galleryPhotosList.length - 1))}
+                  className="px-3.5 py-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 border-2 border-neutral-900 text-neutral-900 text-xs font-gaegu font-bold flex items-center gap-1 shadow-[0_2px_0_0_#171717] active:scale-95 transition-all cursor-pointer"
+                >
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  <span>Sebelumnya</span>
+                </button>
+
+                {/* Counter */}
+                <span className="font-gaegu font-bold text-sm text-neutral-800 tracking-wider">
+                  Foto {selectedPhotoIndex + 1} dari {galleryPhotosList.length}
+                </span>
+
+                {/* Next Button */}
+                <button
+                  type="button"
+                  onClick={() => setSelectedPhotoIndex((prev) => (prev !== null && prev < galleryPhotosList.length - 1 ? prev + 1 : 0))}
+                  className="px-3.5 py-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border-2 border-neutral-900 text-white text-xs font-gaegu font-bold flex items-center gap-1 shadow-[0_2px_0_0_#171717] active:scale-95 transition-all cursor-pointer"
+                >
+                  <span>Berikutnya</span>
+                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
