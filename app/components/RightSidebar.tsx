@@ -1554,7 +1554,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                       </div>
 
                       <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{formatBankTitle(bankName)}</span>
-                      <span className="font-gaegu font-bold text-2xl sm:text-3xl text-neutral-900 tracking-widest my-0.5 select-all">{accNum}</span>
+                      <span className="font-gaegu font-bold text-base sm:text-lg text-neutral-900 tracking-wide my-0.5 select-all break-all text-center max-w-full leading-tight">{accNum}</span>
                       <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {ownerName}</span>
 
                       <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => copyToClipboard(accNum, "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></motion.button>
@@ -1583,7 +1583,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                     </div>
 
                     <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{formatBankTitle(brideBank.bank_name)}</span>
-                    <span className="font-gaegu font-bold text-2xl sm:text-3xl text-neutral-900 tracking-widest my-0.5 select-all">{brideBank.account_number || "777555231"}</span>
+                    <span className="font-gaegu font-bold text-base sm:text-lg text-neutral-900 tracking-wide my-0.5 select-all break-all text-center max-w-full leading-tight">{brideBank.account_number || "777555231"}</span>
                     <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {brideBank.owner_name || brideFull}</span>
 
                     <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => copyToClipboard(brideBank.account_number || "777555231", "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></motion.button>
@@ -1609,7 +1609,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                     </div>
 
                     <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{formatBankTitle(groomBank.bank_name)}</span>
-                    <span className="font-gaegu font-bold text-2xl sm:text-3xl text-neutral-900 tracking-widest my-0.5 select-all">{groomBank.account_number || "777555005"}</span>
+                    <span className="font-gaegu font-bold text-base sm:text-lg text-neutral-900 tracking-wide my-0.5 select-all break-all text-center max-w-full leading-tight">{groomBank.account_number || "777555005"}</span>
                     <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {groomBank.owner_name || groomFull}</span>
 
                     <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => copyToClipboard(groomBank.account_number || "777555005", "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></motion.button>
