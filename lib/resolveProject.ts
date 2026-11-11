@@ -15,6 +15,8 @@ export const isDefaultStorageUrl = (url?: string | null): boolean => {
   return (
     decoded.includes('/undangan/defaults') ||
     decoded.includes('/website serastory') ||
+    decoded.includes('/templates/covers') ||
+    decoded.includes('covers/') ||
     decoded.includes('a3e99edc-aab7-4a84-b0c6-986a2fd0b0bf/a99bab7e-6ed3-48f5-bc1d-23f134794f20') ||
     decoded.includes('/image/pre-wedding/1.jpg') ||
     decoded.includes('/image/pre-wedding/2.jpg') ||
