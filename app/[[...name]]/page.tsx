@@ -33,6 +33,19 @@ const formatFallbackGuestName = (raw: string): string => {
     .join(" ");
 };
 
+const formatDateDisplay = (dateStr?: string | null): string => {
+  try {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "";
+    const days = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+    const months = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+    return `${days[date.getDay()]}, ${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
+  } catch {
+    return "";
+  }
+};
+
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const resolvedParams = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
@@ -62,8 +75,16 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
   const title = `Wedding Invitation for ${guestName} | ${groomName} & ${brideName}`;
   const description = `We cordially invite ${guestName} to share our special day. The wedding celebration of ${groomFull} & ${brideFull}.`;
+  const weddingDateRaw = dbData.events?.[0]?.event_date || dbData.project?.wedding_date;
+  const formattedDate = formatDateDisplay(weddingDateRaw);
+
   const rawCover = dbData.project?.cover_photo_url || dbData.project?.opening_photo_url;
-  const imageUrl = (rawCover && !rawCover.includes("/defaults") && !rawCover.includes("onyx")) ? rawCover : 'https://cdn.serastory.com/templates/covers/illustrated-01-cover.jpg';
+  const hasCustomCover = Boolean(rawCover && !rawCover.includes("/defaults") && !rawCover.includes("onyx") && rawCover.trim() !== "");
+  
+  const protocol = host && (host.includes("localhost") || host.includes("127.0.0.1")) ? "http" : "https";
+  const baseUrl = host ? `${protocol}://${host}` : "";
+  const dynamicOgUrl = baseUrl ? `${baseUrl}/api/og?b=${encodeURIComponent(brideName)}&g=${encodeURIComponent(groomName)}&d=${encodeURIComponent(formattedDate)}` : "/api/og";
+  const imageUrl = hasCustomCover ? (rawCover as string) : dynamicOgUrl;
 
   return {
     title,
