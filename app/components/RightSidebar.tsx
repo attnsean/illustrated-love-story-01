@@ -950,17 +950,19 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
           {events && events.length > 1 ? (
             <div className="space-y-4 pt-2">
               {events.map((evt: any, idx: number) => {
-                const evtTitle = evt.custom_label || (
-                  evt.event_type === "akad" ? "Akad Nikah" :
-                  evt.event_type === "resepsi" ? "Resepsi Pernikahan" :
-                  evt.event_type === "pemberkatan" ? "Pemberkatan" :
-                  evt.event_type === "siraman" ? "Siraman" :
-                  evt.event_type === "midodareni" ? "Midodareni" :
-                  evt.event_type === "pengajian" ? "Pengajian" :
-                  evt.event_type === "pawiwahan" ? "Pawiwahan" :
-                  evt.event_type === "ngaben" ? "Ngaben" :
-                  `Sesi Acara #${idx + 1}`
-                );
+                const evtTitle = (evt.event_type === "custom" && evt.custom_label)
+                  ? evt.custom_label
+                  : (
+                      evt.event_type === "akad" ? (evt.custom_label && !evt.custom_label.toLowerCase().includes("acara") && !evt.custom_label.toLowerCase().includes("resepsi") ? evt.custom_label : "Akad Nikah") :
+                      evt.event_type === "resepsi" ? (evt.custom_label && !evt.custom_label.toLowerCase().includes("acara") && !evt.custom_label.toLowerCase().includes("akad") ? evt.custom_label : "Resepsi Pernikahan") :
+                      evt.event_type === "pemberkatan" ? "Pemberkatan" :
+                      evt.event_type === "siraman" ? "Siraman" :
+                      evt.event_type === "midodareni" ? "Midodareni" :
+                      evt.event_type === "pengajian" ? "Pengajian" :
+                      evt.event_type === "pawiwahan" ? "Pawiwahan" :
+                      evt.event_type === "ngaben" ? "Ngaben" :
+                      (evt.custom_label && evt.custom_label !== "Acara Pernikahan" ? evt.custom_label : `Sesi Acara #${idx + 1}`)
+                    );
                 const evtDate = formatDateDisplay(evt.event_date || weddingDateRaw);
                 const evtTime = evt.event_time ? formatEventTimeDisplay(evt.event_time, evt.end_time) : formattedTime;
                 const evtVenue = evt.venue_name || venueName;
