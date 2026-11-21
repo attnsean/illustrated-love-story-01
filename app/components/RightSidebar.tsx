@@ -258,57 +258,39 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
   const stories = Array.isArray(dbStories) && dbStories.length > 0 ? dbStories : [];
 
-  // Cashless feature check:
-  const isCashlessEnabled = Boolean(
-    (project as any)?.has_cashless || 
-    (project as any)?.subscriptions?.packages?.has_amplop_digital
-  );
-
   // Bank Info
-  let paymentAccounts: any[] = [];
+  let rawPaymentAccounts: any[] = [];
   try {
     if (Array.isArray((project as any)?.payment_accounts)) {
-      paymentAccounts = (project as any).payment_accounts;
+      rawPaymentAccounts = (project as any).payment_accounts;
     } else if (typeof (project as any)?.payment_accounts === "string") {
-      paymentAccounts = JSON.parse((project as any).payment_accounts);
+      rawPaymentAccounts = JSON.parse((project as any).payment_accounts);
     }
   } catch (e) {
-    paymentAccounts = [];
+    rawPaymentAccounts = [];
   }
+
+  // Filter out empty or dummy account numbers
+  const paymentAccounts = (rawPaymentAccounts || []).filter(
+    (acc: any) =>
+      acc &&
+      acc.account_number &&
+      String(acc.account_number).trim() !== "" &&
+      String(acc.account_number).trim() !== "777555231" &&
+      String(acc.account_number).trim() !== "777555005"
+  );
+
+  // Cashless feature check: ONLY enabled if explicit and valid accounts exist
+  const isCashlessEnabled = Boolean(
+    ((project as any)?.has_cashless || (project as any)?.subscriptions?.packages?.has_amplop_digital) &&
+    paymentAccounts.length > 0
+  );
 
   const formatBankTitle = (name?: string) => {
     if (!name) return "BANK BCA";
     const clean = name.replace(/:/g, "").trim().toUpperCase();
     return clean.startsWith("BANK") ? clean : `BANK ${clean}`;
   };
-
-  const brideBank = paymentAccounts[0]
-    ? {
-        bank_name: paymentAccounts[0].provider || paymentAccounts[0].bank_name || "BANK BCA",
-        account_number: paymentAccounts[0].account_number || "777555231",
-        owner_name: paymentAccounts[0].account_name || paymentAccounts[0].owner_name || brideFull,
-        nickname: brideNickname,
-      }
-    : ((project as any)?.bride_bank || {
-        bank_name: "BANK BCA",
-        account_number: "777555231",
-        owner_name: brideFull,
-        nickname: brideNickname,
-      });
-
-  const groomBank = paymentAccounts[1]
-    ? {
-        bank_name: paymentAccounts[1].provider || paymentAccounts[1].bank_name || "BANK BCA",
-        account_number: paymentAccounts[1].account_number || "777555005",
-        owner_name: paymentAccounts[1].account_name || paymentAccounts[1].owner_name || groomFull,
-        nickname: groomNickname,
-      }
-    : ((project as any)?.groom_bank || {
-        bank_name: "BANK BCA",
-        account_number: "777555005",
-        owner_name: groomFull,
-        nickname: groomNickname,
-      });
 
   const coverPhoto = (!isDefaultStorageUrl(project?.opening_photo_url) ? project?.opening_photo_url : null)
     || (!isDefaultStorageUrl(project?.cover_photo_url) ? project?.cover_photo_url : null);
@@ -1501,7 +1483,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
         )}
 
         {/* 5. WEDDING GIFT SECTION */}
-        {isCashlessEnabled && (
+        {isCashlessEnabled && paymentAccounts.length > 0 && (
           <motion.section 
             initial={{ opacity: 0, y: 40, scale: 0.96 }}
             whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -1528,49 +1510,19 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
             </div>
 
             <div className={`grid ${paymentAccounts.length === 1 ? "grid-cols-1 max-w-xs mx-auto" : "grid-cols-2"} gap-3 pt-3`}>
-              {paymentAccounts.length > 0 ? (
-                paymentAccounts.map((acc: any, idx: number) => {
-                  const bankName = acc.provider || acc.bank_name || "BANK BCA";
-                  const accNum = acc.account_number || "";
-                  const ownerName = acc.account_name || acc.owner_name || (idx === 0 ? brideFull : groomFull);
-                  const nick = idx === 0 ? (brideBank.nickname || brideNickname) : (idx === 1 ? (groomBank.nickname || groomNickname) : (acc.account_name || `Rekening #${idx + 1}`));
+              {paymentAccounts.map((acc: any, idx: number) => {
+                const bankName = acc.provider || acc.bank_name || "BANK BCA";
+                const accNum = acc.account_number || "";
+                const ownerName = acc.account_name || acc.owner_name || (idx === 0 ? brideFull : groomFull);
+                const nick = idx === 0 ? brideNickname : (idx === 1 ? groomNickname : (acc.account_name || `Rekening #${idx + 1}`));
 
-                  return (
-                    <motion.div 
-                      key={idx}
-                      initial={{ opacity: 0, y: 20, scale: 0.96 }}
-                      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                      viewport={{ once: false, amount: 0.2 }}
-                      transition={{ duration: 0.6, delay: 0.1 * (idx + 1) }}
-                      whileHover={{ y: -5, scale: 1.02 }} 
-                      className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-4 sm:p-5 shadow-sm"
-                    >
-                      <div className="w-7 h-7 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-7 bg-white mb-2 shadow-xs">
-                        <span className="text-xs text-red-500">♥</span>
-                      </div>
-
-                      <div className="border border-red-500 rounded-full px-4 py-0.5 mb-2 bg-transparent">
-                        <span className="font-gaegu font-bold text-xl sm:text-2xl text-red-500 block leading-tight">
-                          {nick}
-                        </span>
-                      </div>
-
-                      <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{formatBankTitle(bankName)}</span>
-                      <span className="font-gaegu font-bold text-base sm:text-lg text-neutral-900 tracking-wide my-0.5 select-all break-all text-center max-w-full leading-tight">{accNum}</span>
-                      <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {ownerName}</span>
-
-                      <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => copyToClipboard(accNum, "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></motion.button>
-                    </motion.div>
-                  );
-                })
-              ) : (
-                <>
-                  {/* Bride Tag Card */}
+                return (
                   <motion.div 
-                    initial={{ opacity: 0, x: -30, y: 20, scale: 0.96 }}
-                    whileInView={{ opacity: 1, x: 0, y: 0, scale: 1 }}
+                    key={idx}
+                    initial={{ opacity: 0, y: 20, scale: 0.96 }}
+                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
                     viewport={{ once: false, amount: 0.2 }}
-                    transition={{ duration: 0.6, delay: 0.1 }}
+                    transition={{ duration: 0.6, delay: 0.1 * (idx + 1) }}
                     whileHover={{ y: -5, scale: 1.02 }} 
                     className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-4 sm:p-5 shadow-sm"
                   >
@@ -1580,44 +1532,18 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
 
                     <div className="border border-red-500 rounded-full px-4 py-0.5 mb-2 bg-transparent">
                       <span className="font-gaegu font-bold text-xl sm:text-2xl text-red-500 block leading-tight">
-                        {brideBank.nickname || brideNickname}
+                        {nick}
                       </span>
                     </div>
 
-                    <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{formatBankTitle(brideBank.bank_name)}</span>
-                    <span className="font-gaegu font-bold text-base sm:text-lg text-neutral-900 tracking-wide my-0.5 select-all break-all text-center max-w-full leading-tight">{brideBank.account_number || "777555231"}</span>
-                    <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {brideBank.owner_name || brideFull}</span>
+                    <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{formatBankTitle(bankName)}</span>
+                    <span className="font-gaegu font-bold text-base sm:text-lg text-neutral-900 tracking-wide my-0.5 select-all break-all text-center max-w-full leading-tight">{accNum}</span>
+                    <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {ownerName}</span>
 
-                    <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => copyToClipboard(brideBank.account_number || "777555231", "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></motion.button>
+                    <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => copyToClipboard(accNum, "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></motion.button>
                   </motion.div>
-
-                  {/* Groom Tag Card */}
-                  <motion.div 
-                    initial={{ opacity: 0, x: 30, y: 20, scale: 0.96 }}
-                    whileInView={{ opacity: 1, x: 0, y: 0, scale: 1 }}
-                    viewport={{ once: false, amount: 0.2 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    whileHover={{ y: -5, scale: 1.02 }} 
-                    className="relative flex flex-col items-center bg-white border-2 border-neutral-900 rounded-3xl p-4 sm:p-5 shadow-sm"
-                  >
-                    <div className="w-7 h-7 border-2 border-neutral-900 rounded-full flex items-center justify-center -mt-7 bg-white mb-2 shadow-xs">
-                      <span className="text-xs text-red-500">♥</span>
-                    </div>
-
-                    <div className="border border-red-500 rounded-full px-4 py-0.5 mb-2 bg-transparent">
-                      <span className="font-gaegu font-bold text-xl sm:text-2xl text-red-500 block leading-tight">
-                        {groomBank.nickname || groomNickname}
-                      </span>
-                    </div>
-
-                    <span className="font-gaegu text-base sm:text-lg font-bold text-neutral-800 tracking-wide">{formatBankTitle(groomBank.bank_name)}</span>
-                    <span className="font-gaegu font-bold text-base sm:text-lg text-neutral-900 tracking-wide my-0.5 select-all break-all text-center max-w-full leading-tight">{groomBank.account_number || "777555005"}</span>
-                    <span className="font-gaegu text-xs sm:text-sm font-bold text-neutral-600">A.N {groomBank.owner_name || groomFull}</span>
-
-                    <motion.button whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }} type="button" onClick={() => copyToClipboard(groomBank.account_number || "777555005", "Nomor rekening")} className="mt-3 w-full py-2.5 bg-neutral-900 hover:bg-neutral-800 text-white rounded-full flex items-center justify-center gap-1.5 transition-colors shadow-sm"><span className="font-gaegu font-bold text-sm tracking-wider uppercase">SALIN REKENING</span></motion.button>
-                  </motion.div>
-                </>
-              )}
+                );
+              })}
             </div>
 
             {/* Red Note Box */}
