@@ -1073,7 +1073,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2.5 bg-neutral-900 text-white font-gaegu font-bold text-sm tracking-widest px-8 py-3 rounded-full hover:bg-neutral-800 transition-all shadow-md group"
-                 onClick={(e) => { e.stopPropagation(); window.open(evtMaps, "_blank", "noopener,noreferrer"); }} >
+                 onClick={(e) => { e.stopPropagation(); window.open(mapsUrl, "_blank", "noopener,noreferrer"); }} >
                   <img src={ASSETS.pinIcon} alt="Pin" className="w-4 h-4 object-contain brightness-0 invert group-hover:animate-bounce" />
                   <span>Buka Google Maps</span>
                 </motion.a>
