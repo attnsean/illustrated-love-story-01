@@ -992,9 +992,9 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center justify-center gap-2 bg-neutral-900 text-white font-gaegu font-bold text-xs tracking-wider px-6 py-2 rounded-full hover:bg-neutral-800 transition-all shadow-sm group"
-                        >
+                         onClick={(e) = onClick={(e) => { e.stopPropagation(); window.open(evtMaps, "_blank", "noopener,noreferrer"); }} > { e.stopPropagation(); window.open(evtMaps, "_blank", "noopener,noreferrer"); }} >
                           <img src={ASSETS.pinIcon} alt="Pin" className="w-3.5 h-3.5 object-contain brightness-0 invert group-hover:animate-bounce" />
-                          <span>OPEN MAP</span>
+                          <span>Buka Google Maps</span>
                         </motion.a>
                       </div>
                     )}
@@ -1058,7 +1058,7 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                 </motion.div>
               </div>
 
-              {/* Open Map Button */}
+              {/* Buka Google Maps Button */}
               <motion.div 
                 initial={{ opacity: 0, y: 20, scale: 0.9 }}
                 whileInView={{ opacity: 1, y: 0, scale: 1 }}
@@ -1073,9 +1073,9 @@ export default function RightSidebar({ guestName, guest, project, events, wishes
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-2.5 bg-neutral-900 text-white font-gaegu font-bold text-sm tracking-widest px-8 py-3 rounded-full hover:bg-neutral-800 transition-all shadow-md group"
-                >
+                 onClick={(e) = onClick={(e) => { e.stopPropagation(); window.open(mapsUrl, "_blank", "noopener,noreferrer"); }} > { e.stopPropagation(); window.open(mapsUrl, "_blank", "noopener,noreferrer"); }} >
                   <img src={ASSETS.pinIcon} alt="Pin" className="w-4 h-4 object-contain brightness-0 invert group-hover:animate-bounce" />
-                  <span>OPEN MAP</span>
+                  <span>Buka Google Maps</span>
                 </motion.a>
               </motion.div>
             </>
